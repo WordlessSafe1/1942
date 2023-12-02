@@ -18,7 +18,10 @@ pygame.init()
 screen = pygame.display.set_mode([screenwidth, screenheight], pygame.SCALED, vsync=1)
 clock = pygame.time.Clock()
 
-all_sprites = pygame.sprite.Group()
+live_sprites = pygame.sprite.Group()
+friendly_sprites = pygame.sprite.Group()
+hostile_sprites = pygame.sprite.Group()
+friendly_fire = pygame.sprite.Group()
 
 bgm = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
 bgm.play(loops=-1)
@@ -59,13 +62,33 @@ GAME_MAP = [
     1, # Carrier
 ]
 
+ENEMY_SPRITES = SpriteSheet.from_size("resources/img/Enemies.png", 15, 16, 4, 4)
+for y in range(len(ENEMY_SPRITES)):
+    for x in range(len(ENEMY_SPRITES[y])):
+        sprite = ENEMY_SPRITES[y][x]
+        ENEMY_SPRITES[y][x] = pygame.transform.scale(sprite, (sprite.get_width() * SCREEN_SCALE, sprite.get_height() * SCREEN_SCALE))
+
+# 0: dx, 1: dy, 2: ticks, 3: frame_x, 4: frame_y
+ENEMY_PATHS = {
+    "cross left":  [ (0,0,0,0,0), # init
+        (-.4,  3,  200,  0, 2),
+        (-.4,  1,   20,  8, 2),
+        (-.4,  0,   20,  9, 2),
+        (-.4, -1,   20, 10, 2),
+        (-.4, -3, 2000,  4, 0),
+    ],
+    "cross right": [ (0,0,0,0,0), # init
+        ( .4,  3,  200,  0, 2),
+        ( .4,  1,   20,  8, 2),
+        ( .4,  0,   20,  9, 2),
+        ( .4, -1,   20, 10, 2),
+        ( .4, -3, 2000,  4, 0),
+    ],
+}
+
 for i in range(len(MAP_TILES)):
     tile = MAP_TILES[i]
     MAP_TILES[i] = pygame.transform.scale(tile, (tile.get_width() * SCREEN_SCALE, tile.get_height() * SCREEN_SCALE))
-
-friendly_sprites = pygame.sprite.Group()
-hostile_sprites = pygame.sprite.Group()
-friendly_fire = pygame.sprite.Group()
 
 class Player(pygame.sprite.Sprite):
     _L_SPEED = .3                 # Lean speed
@@ -104,7 +127,7 @@ class Player(pygame.sprite.Sprite):
         if keys[K_SPACE] and (not self._fire_cooldown) and len(friendly_fire) < self._MAX_SHOTS:
             bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y - 5 * SCREEN_SCALE, "player", 0, 1)
             bullet.rect.x -= bullet.rect.width / 2
-            all_sprites.add(bullet)
+            live_sprites.add(bullet)
             friendly_fire.add(bullet)
             self._fire_cooldown = self._FIRE_COOLDOWN
         if not delta_lean and self._lean:
@@ -155,17 +178,77 @@ class Bullet(pygame.sprite.Sprite):
         collisions = pygame.sprite.spritecollide(self, targets, True)
         for collision in collisions:
             collision.kill()
+            self.kill()
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x:int|float, y:int|float, motion:list[tuple[int|float,int|float,int,int,int]], skip_frames:int = 0, skip_ticks:int = 0):
+        """
+        Initialize an Enemy
+        @param motion - a list of tuples(dx, dy, ticks, frame_x, frame_y)
+        """
+        pygame.sprite.Sprite.__init__(self)
+        self.image = ENEMY_SPRITES[0][0]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self._motion = motion
+        self._motion_index = skip_frames
+        self._motion_ticks = skip_ticks
+        self._dx = 0
+        self._dy = 0
+        self.x = x
+        self.y = y
+        # self._prop_ticks = 0
+
+    def update(self, keys):
+        if self._motion_ticks >= self._motion[self._motion_index][2]:
+            self._motion_ticks = 0
+            self._motion_index += 1
+            if self._motion_index >= len(self._motion):
+                self.kill()
+                return
+            self._dx, self._dy, _, frame_x, frame_y = self._motion[self._motion_index]
+            self.image = ENEMY_SPRITES[frame_x][frame_y]
+        self.x += self._dx
+        self.y += self._dy
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self._motion_ticks += 1
+
+        # self._prop_ticks += 1
+        # if not self._prop_ticks % 10:
+        #     self.update_propellers()
+        
+    # My trick of flipping the colors doesn't work because there are other parts of the sprite that are the same color
+    # def update_propellers(self):
+    #     prop_up   = (192, 192, 144)
+    #     prop_down = (128, 128,  80)
+    #     for y in range(self.rect.height):
+    #         for x in range(self.rect.width):
+    #             pixel = self.image.get_at((x, y))
+    #             if pixel == prop_up:
+    #                 self.image.set_at((x, y), prop_down)
+    #             elif pixel == prop_down:
+    #                 self.image.set_at((x, y), prop_up)
+
 
 def main() -> None:
     pygame.display.set_caption("1942")
     running = True
     player = Player()
-    all_sprites.add(player)
+    friendly_sprites.add(player)
+    live_sprites.add(player)
     map_tile = GAME_MAP[0]
     transfer_map_tile = GAME_MAP[1]
     map_pos  = 200
     transfer_map_pos = map_pos + MAP_TILES[transfer_map_tile].get_height()
     next_map_tile = 2
+    enemy = Enemy(0, 0, ENEMY_PATHS["cross left"], 0, 50)
+    enemy.y = -enemy.rect.height
+    enemy.x = screenwidth - enemy.rect.width
+    hostile_sprites.add(enemy)
+    live_sprites.add(enemy)
+    wave_ticks = 0
     while running:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -173,7 +256,18 @@ def main() -> None:
 
 
         keys = pygame.key.get_pressed()
-        all_sprites.update(keys)
+        live_sprites.update(keys)
+
+
+        # wave_ticks += 1
+        # if not wave_ticks % 100:
+        #     enemy = Enemy(screenwidth, -100, ENEMY_PATHS["cross left"])
+        #     enemy.rect.y = -enemy.rect.height
+        #     hostile_sprites.add(enemy)
+        #     live_sprites.add(enemy)
+        #     enemy = Enemy(0, -80, ENEMY_PATHS["cross right"])
+        #     hostile_sprites.add(enemy)
+        #     live_sprites.add(enemy)
 
 
         #region Draw
@@ -196,7 +290,7 @@ def main() -> None:
         #endregion MapScrolling
 
         # pygame.draw.rect(screen, red, player.rect, 1)
-        all_sprites.draw(screen)
+        live_sprites.draw(screen)
         pygame.display.flip()
         #endregion Draw
 
