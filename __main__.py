@@ -68,21 +68,37 @@ for y in range(len(ENEMY_SPRITES)):
         sprite = ENEMY_SPRITES[y][x]
         ENEMY_SPRITES[y][x] = pygame.transform.scale(sprite, (sprite.get_width() * SCREEN_SCALE, sprite.get_height() * SCREEN_SCALE))
 
+ENEMY_SIZE = (15 * SCREEN_SCALE, 16 * SCREEN_SCALE)
+
 # 0: dx, 1: dy, 2: ticks, 3: frame_x, 4: frame_y
 ENEMY_PATHS = {
-    "cross left":  [ (0,0,0,0,0), # init
+    "cross left":  [
         (-.4,  3,  200,  0, 2),
         (-.4,  1,   20,  8, 2),
         (-.4,  0,   20,  9, 2),
         (-.4, -1,   20, 10, 2),
         (-.4, -3, 2000,  4, 0),
     ],
-    "cross right": [ (0,0,0,0,0), # init
+    "cross left wide":  [
+        (-.7,  3,  200,  0, 2),
+        (-.7,  1,   20,  8, 2),
+        (-.7,  0,   20,  9, 2),
+        (-.7, -1,   20, 10, 2),
+        (-.7, -3, 2000,  4, 0),
+    ],
+    "cross right": [
         ( .4,  3,  200,  0, 2),
         ( .4,  1,   20,  8, 2),
         ( .4,  0,   20,  9, 2),
         ( .4, -1,   20, 10, 2),
         ( .4, -3, 2000,  4, 0),
+    ],
+    "cross right wide": [
+        ( .7,  3,  200,  0, 2),
+        ( .7,  1,   20,  8, 2),
+        ( .7,  0,   20,  9, 2),
+        ( .7, -1,   20, 10, 2),
+        ( .7, -3, 2000,  4, 0),
     ],
 }
 
@@ -187,15 +203,14 @@ class Enemy(pygame.sprite.Sprite):
         @param motion - a list of tuples(dx, dy, ticks, frame_x, frame_y)
         """
         pygame.sprite.Sprite.__init__(self)
-        self.image = ENEMY_SPRITES[0][0]
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
         self._motion = motion
         self._motion_index = skip_frames
         self._motion_ticks = skip_ticks
-        self._dx = 0
-        self._dy = 0
+        self._dx, self._dy, _, frame_x, frame_y = self._motion[self._motion_index]
+        self.image = ENEMY_SPRITES[frame_x][frame_y]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
         self.x = x
         self.y = y
         # self._prop_ticks = 0
@@ -232,6 +247,19 @@ class Enemy(pygame.sprite.Sprite):
     #                 self.image.set_at((x, y), prop_up)
 
 
+# [ (Enemy Object, Wait Time), ... ]
+ENEMY_WAVES = [
+    (Enemy(screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],       0,  25),   0),
+    (Enemy(screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,  25),  20),
+    (Enemy(screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,   0),  25),
+    (Enemy(ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"], 0, -25),  20),
+    (Enemy(screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],  0, -50), 325),
+    (Enemy(ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,  25),  50),
+
+
+    (None, -1), # Wait infinitely until the game ends
+]
+
 def main() -> None:
     pygame.display.set_caption("1942")
     running = True
@@ -243,12 +271,8 @@ def main() -> None:
     map_pos  = 200
     transfer_map_pos = map_pos + MAP_TILES[transfer_map_tile].get_height()
     next_map_tile = 2
-    enemy = Enemy(0, 0, ENEMY_PATHS["cross left"], 0, 50)
-    enemy.y = -enemy.rect.height
-    enemy.x = screenwidth - enemy.rect.width
-    hostile_sprites.add(enemy)
-    live_sprites.add(enemy)
     wave_ticks = 0
+    wave = 0
     while running:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -259,19 +283,15 @@ def main() -> None:
         live_sprites.update(keys)
 
 
-        # wave_ticks += 1
-        # if not wave_ticks % 100:
-        #     enemy = Enemy(screenwidth, -100, ENEMY_PATHS["cross left"])
-        #     enemy.rect.y = -enemy.rect.height
-        #     hostile_sprites.add(enemy)
-        #     live_sprites.add(enemy)
-        #     enemy = Enemy(0, -80, ENEMY_PATHS["cross right"])
-        #     hostile_sprites.add(enemy)
-        #     live_sprites.add(enemy)
-
-
-        #region Draw
-        screen.fill(grey)
+        #region SpawnEnemies
+        while wave_ticks == ENEMY_WAVES[wave][1]:
+            enemy = ENEMY_WAVES[wave][0]
+            hostile_sprites.add(enemy)
+            live_sprites.add(enemy)
+            wave_ticks = 0
+            wave += 1
+        wave_ticks += 1
+        #endregion SpawnEnemies
 
         #region MapScrolling
         if map_pos <= 0:
@@ -285,9 +305,14 @@ def main() -> None:
             transfer_map_pos = map_pos + MAP_TILES[transfer_map_tile].get_height()
         map_pos -= SCROLL_SPEED
         transfer_map_pos -= SCROLL_SPEED
+        #endregion MapScrolling
+
+
+        #region Draw
+        screen.fill(grey)
+
         screen.blit(MAP_TILES[map_tile], (0, screenheight - map_pos))
         screen.blit(MAP_TILES[transfer_map_tile], (0, screenheight - transfer_map_pos))
-        #endregion MapScrolling
 
         # pygame.draw.rect(screen, red, player.rect, 1)
         live_sprites.draw(screen)
