@@ -23,8 +23,17 @@ all_sprites = pygame.sprite.Group()
 bgm = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
 bgm.play(loops=-1)
 
-PLAYER_SPRITESHEET = SpriteSheet("resources/img/Sprites.png", 8, 2, pygame.Rect(0, 0, 255, 50))
+SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert()
+PLAYER_SPRITESHEET = SpriteSheet("resources/img/Sprites.png", 8, 2, pygame.Rect(2, 0, 255, 50))
 MAP_SPRITESHEET = pygame.image.load("resources/img/MapTiles.png").convert()
+bullet_sprites = {
+    "enemy":  SPRITESHEET.subsurface(pygame.Rect( 74,  89,   6,   6)),
+    "player": SPRITESHEET.subsurface(pygame.Rect(101,  82,  15,  14)),
+}
+
+for k in bullet_sprites.keys():
+    bullet_sprites[k] = pygame.transform.scale(bullet_sprites[k], (bullet_sprites[k].get_width() * SCREEN_SCALE, bullet_sprites[k].get_height() * SCREEN_SCALE))
+
 ocean_raw = MAP_SPRITESHEET.subsurface(pygame.Rect(0, 0, 225, 175))
 ocean = pygame.surface.Surface((255, 500))
 height = ocean_raw.get_height()
@@ -54,12 +63,16 @@ for i in range(len(MAP_TILES)):
     tile = MAP_TILES[i]
     MAP_TILES[i] = pygame.transform.scale(tile, (tile.get_width() * SCREEN_SCALE, tile.get_height() * SCREEN_SCALE))
 
-space_held = False
+friendly_sprites = pygame.sprite.Group()
+hostile_sprites = pygame.sprite.Group()
+friendly_fire = pygame.sprite.Group()
 
 class Player(pygame.sprite.Sprite):
     _L_SPEED = .3                 # Lean speed
     _H_SPEED = 2   * SCREEN_SCALE # Horizontal speed
     _V_SPEED = 2.5 * SCREEN_SCALE # Vertical speed
+    _FIRE_COOLDOWN = 6
+    _MAX_SHOTS = 3
     
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -72,10 +85,12 @@ class Player(pygame.sprite.Sprite):
         self._tilt_frames = [self._images[6], self._images[4], self._images[2], self._images[0], self._images[1], self._images[3], self._images[5]]
         self._lean = 0
         self._prop_ticks = 0
+        self._fire_cooldown = 0
 
     def update(self, keys):
-        global space_held
         delta_lean = 0
+        if self._fire_cooldown:
+            self._fire_cooldown -= 1
         if keys[K_RIGHT] and self.rect.x + self.rect.width < screenwidth - 5:
             self.rect.x += self._H_SPEED
             delta_lean += self._L_SPEED
@@ -86,13 +101,12 @@ class Player(pygame.sprite.Sprite):
             self.rect.y -= self._V_SPEED
         if keys[K_DOWN] and self.rect.y + self.rect.height < screenheight:
             self.rect.y += self._V_SPEED
-        if keys[K_SPACE] and not space_held:
-            self._frame = (self._frame + 1) % len(self._images)
-            self.image = self._images[self._frame]
-            self.image = pygame.transform.scale(self.image, (self.image.get_width() * SCREEN_SCALE, self.image.get_height() * SCREEN_SCALE))
-            space_held = True
-        elif not keys[K_SPACE]:
-            space_held = False
+        if keys[K_SPACE] and (not self._fire_cooldown) and len(friendly_fire) < self._MAX_SHOTS:
+            bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y - 5 * SCREEN_SCALE, "player", 0, 1)
+            bullet.rect.x -= bullet.rect.width / 2
+            all_sprites.add(bullet)
+            friendly_fire.add(bullet)
+            self._fire_cooldown = self._FIRE_COOLDOWN
         if not delta_lean and self._lean:
             delta_lean = -self._L_SPEED if self._lean > 0 else self._L_SPEED
         self._lean = max(-3, min(self._lean + delta_lean, 3))
@@ -117,7 +131,30 @@ class Player(pygame.sprite.Sprite):
                 elif pixel == prop_down:
                     self.image.set_at((x, y), prop_up)
 
+class Bullet(pygame.sprite.Sprite):
+    _SPEED = 5 * SCREEN_SCALE
+    def __init__(self, x, y, style, dx, dy):
+        pygame.sprite.Sprite.__init__(self)
+        if style not in bullet_sprites.keys():
+            raise ValueError(f"Invalid bullet style: {style}")
+        self.image = bullet_sprites[style]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self._style = style
+        self._dx = dx
+        self._dy = dy
 
+    def update(self, keys):
+        self.rect.y -= self._SPEED * self._dy
+        self.rect.x += self._SPEED * self._dx
+        if self.rect.y < -self.rect.height:
+            self.kill()
+            return
+        targets = friendly_sprites if self._style == "enemy" else hostile_sprites
+        collisions = pygame.sprite.spritecollide(self, targets, True)
+        for collision in collisions:
+            collision.kill()
 
 def main() -> None:
     pygame.display.set_caption("1942")
@@ -136,7 +173,7 @@ def main() -> None:
 
 
         keys = pygame.key.get_pressed()
-        player.update(keys)
+        all_sprites.update(keys)
 
 
         #region Draw
