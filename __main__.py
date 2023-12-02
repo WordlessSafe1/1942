@@ -1,6 +1,15 @@
 import pygame
 from pygame.locals import *
 from spritesheet import SpriteSheet
+from random import randint, seed
+from typing import Optional
+
+
+GAME_OVER  = pygame.USEREVENT + 0
+
+DEATH_SCREEN_TICKS = 500
+
+seed("1942")
 
 white = (255, 255, 255)
 black = (  0,   0,   0)
@@ -15,6 +24,11 @@ screenheight = 400 * SCREEN_SCALE
 screenwidth  = 200 * SCREEN_SCALE
 
 pygame.init()
+
+SMALL_FONT = pygame.font.Font("resources/fnt/1942.ttf", 10)
+MEDIUM_FONT = pygame.font.Font("resources/fnt/1942.ttf", 20)
+LARGE_FONT = pygame.font.Font("resources/fnt/1942.ttf", 35)
+
 screen = pygame.display.set_mode([screenwidth, screenheight], pygame.SCALED, vsync=1)
 clock = pygame.time.Clock()
 
@@ -24,8 +38,8 @@ hostile_sprites = pygame.sprite.Group()
 friendly_fire = pygame.sprite.Group()
 
 bgm = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
-bgm.play(loops=-1)
 score = 0
+player:Optional["Player"] = None
 
 SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert()
 PLAYER_SPRITESHEET = SpriteSheet("resources/img/Sprites.png", 8, 2, pygame.Rect(2, 0, 255, 50))
@@ -71,7 +85,7 @@ for y in range(len(ENEMY_SPRITES)):
 
 ENEMY_SIZE = (15 * SCREEN_SCALE, 16 * SCREEN_SCALE)
 
-# 0: dx, 1: dy, 2: ticks, 3: frame_x, 4: frame_y
+# 0: dx, 1: dy, 2: ticks, 3: frame_x, 4: frame_y, 5: fire
 ENEMY_PATHS = {
     "cross left":  [
         (-.4,  3,  200,  0, 2),
@@ -171,6 +185,11 @@ class Player(pygame.sprite.Sprite):
                 elif pixel == prop_down:
                     self.image.set_at((x, y), prop_up)
 
+    def kill(self):
+        pygame.event.post(pygame.event.Event(GAME_OVER, {"win": False}))
+        super().kill()
+
+
 class Bullet(pygame.sprite.Sprite):
     _SPEED = 5 * SCREEN_SCALE
     def __init__(self, x, y, style, dx, dy):
@@ -197,6 +216,7 @@ class Bullet(pygame.sprite.Sprite):
             collision.kill()
             self.kill()
 
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x:int|float, y:int|float, motion:list[tuple[int|float,int|float,int,int,int]], skip_frames:int = 0, skip_ticks:int = 0):
         """
@@ -221,7 +241,7 @@ class Enemy(pygame.sprite.Sprite):
             self._motion_ticks = 0
             self._motion_index += 1
             if self._motion_index >= len(self._motion):
-                self.kill()
+                super().kill()
                 return
             self._dx, self._dy, _, frame_x, frame_y = self._motion[self._motion_index]
             self.image = ENEMY_SPRITES[frame_x][frame_y]
@@ -231,6 +251,17 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = self.y
         self._motion_ticks += 1
         self._dead = False
+
+        if not randint(0, 400):
+            # Fire a bullet towards the player's current position
+            dx = player.rect.x - self.rect.x
+            dy = self.rect.y - player.rect.y
+            mag = (dx ** 2 + dy ** 2) ** .5
+            dx /= mag
+            dy /= mag
+            bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height, "enemy", dx, dy)
+            bullet.rect.x -= bullet.rect.width / 2
+            live_sprites.add(bullet)
 
         # self._prop_ticks += 1
         # if not self._prop_ticks % 10:
@@ -250,27 +281,32 @@ class Enemy(pygame.sprite.Sprite):
 
     def kill(self):
         global score
+        super().kill()
         if not self._dead:
             self._dead = True
             score += 50
-        super().kill()
         # TODO: Add death animation
 
 
-# [ (Enemy Object, Wait Time), ... ]
+# [ (EnemyType, Constructor Arguments, Wait Time), ... ]
 ENEMY_WAVES = [
-    (Enemy(screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],       0,  25),   0),
-    (Enemy(screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,  25),  20),
-    (Enemy(screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,   0),  25),
-    (Enemy(ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"], 0, -25),  20),
-    (Enemy(screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],  0, -50), 325),
-    (Enemy(ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,  25),  50),
+    (Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],       0,  25),   0),
+    (Enemy, (screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,  25),  20),
+    (Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,   0),  25),
+    (Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"], 0, -25),  20),
+    (Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],  0, -50), 325),
+    (Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,  25),  50),
 
-
-    (None, -1), # Wait infinitely until the game ends
+    (None, None, -1), # Wait infinitely until the game ends
 ]
 
-def main() -> None:
+def start_game() -> int:
+    """
+    Start the game loop.
+    Return 0 to restart the game, -1 to quit
+    """
+    global player
+    bgm.play(loops=-1)
     pygame.display.set_caption("1942")
     running = True
     player = Player()
@@ -283,10 +319,29 @@ def main() -> None:
     next_map_tile = 2
     wave_ticks = 0
     wave = 0
+    paused = False
+    game_over = 0
+    score_text = SMALL_FONT.render("Score", True, red)
     while running:
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
+                break
+            elif event.type == GAME_OVER:
+                game_over = 1
+            elif event.type == KEYDOWN and (not game_over) and event.key == K_ESCAPE:
+                if paused:
+                    pygame.mixer.unpause()
+                    paused = False
+                else:
+                    pygame.mixer.pause()
+                    paused = True
+                    text = LARGE_FONT.render("PAUSED", True, red)
+                    screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
+                    pygame.display.flip()
+
+        if paused:
+            continue
 
 
         keys = pygame.key.get_pressed()
@@ -294,8 +349,9 @@ def main() -> None:
 
 
         #region SpawnEnemies
-        while wave_ticks == ENEMY_WAVES[wave][1]:
-            enemy = ENEMY_WAVES[wave][0]
+        while wave_ticks == ENEMY_WAVES[wave][2]:
+            type, args, _ = ENEMY_WAVES[wave]
+            enemy = type(*args)
             hostile_sprites.add(enemy)
             live_sprites.add(enemy)
             wave_ticks = 0
@@ -327,16 +383,39 @@ def main() -> None:
         # pygame.draw.rect(screen, red, player.rect, 1)
         live_sprites.draw(screen)
 
-        font = pygame.font.SysFont("Arial", 20)
-        text = font.render(f"Score: {score}", True, white)
-        screen.blit(text, (screenwidth / 2 - 25 * SCREEN_SCALE, 0))
+        screen.blit(score_text, ((screenwidth - score_text.get_width()) / 2, 5 * SCREEN_SCALE))
+        text = SMALL_FONT.render(str(score), True, white)
+        screen.blit(text, ((screenwidth - text.get_width()) / 2, score_text.get_height() + 7 * SCREEN_SCALE))
+
+        if game_over:
+            game_over += 1
+            if game_over > DEATH_SCREEN_TICKS:
+                return 0
+            text = LARGE_FONT.render("GAME OVER", True, red)
+            screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
 
         pygame.display.flip()
         #endregion Draw
 
         clock.tick(60)
     pygame.quit()
-    return
+    return -1
+
+def cleanup() -> None:
+    global score
+    seed("1942")
+    print(live_sprites, friendly_sprites, hostile_sprites, friendly_fire)
+    for sprite in live_sprites.sprites():
+        sprite.kill()
+    print(live_sprites, friendly_sprites, hostile_sprites, friendly_fire)
+    pygame.mixer.stop()
+    screen.fill(black)
+    pygame.display.flip()
+    score = 0
+
+def main() -> None:
+    while not start_game():
+        cleanup()
 
 
 
