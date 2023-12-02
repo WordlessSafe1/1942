@@ -25,6 +25,7 @@ friendly_fire = pygame.sprite.Group()
 
 bgm = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
 bgm.play(loops=-1)
+score = 0
 
 SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert()
 PLAYER_SPRITESHEET = SpriteSheet("resources/img/Sprites.png", 8, 2, pygame.Rect(2, 0, 255, 50))
@@ -229,6 +230,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
         self._motion_ticks += 1
+        self._dead = False
 
         # self._prop_ticks += 1
         # if not self._prop_ticks % 10:
@@ -245,6 +247,14 @@ class Enemy(pygame.sprite.Sprite):
     #                 self.image.set_at((x, y), prop_down)
     #             elif pixel == prop_down:
     #                 self.image.set_at((x, y), prop_up)
+
+    def kill(self):
+        global score
+        if not self._dead:
+            self._dead = True
+            score += 50
+        super().kill()
+        # TODO: Add death animation
 
 
 # [ (Enemy Object, Wait Time), ... ]
@@ -316,6 +326,11 @@ def main() -> None:
 
         # pygame.draw.rect(screen, red, player.rect, 1)
         live_sprites.draw(screen)
+
+        font = pygame.font.SysFont("Arial", 20)
+        text = font.render(f"Score: {score}", True, white)
+        screen.blit(text, (screenwidth / 2 - 25 * SCREEN_SCALE, 0))
+
         pygame.display.flip()
         #endregion Draw
 
