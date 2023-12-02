@@ -85,36 +85,110 @@ for y in range(len(ENEMY_SPRITES)):
 
 ENEMY_SIZE = (15 * SCREEN_SCALE, 16 * SCREEN_SCALE)
 
-# 0: dx, 1: dy, 2: ticks, 3: frame_x, 4: frame_y, 5: fire
+# 0: dx, 1: dy, 2: ticks, 3: frame_x, 4: frame_y
 ENEMY_PATHS = {
     "cross left":  [
-        (-.4,  3,  200,  0, 2),
-        (-.4,  1,   20,  8, 2),
-        (-.4,  0,   20,  9, 2),
-        (-.4, -1,   20, 10, 2),
-        (-.4, -3, 2000,  4, 0),
+        (  -.4,     3,  200,  0, 2),
+        (  -.4,     1,   20,  8, 2),
+        (  -.4,     0,   20,  9, 2),
+        (  -.4,    -1,   20, 10, 2),
+        (  -.4,    -3, 2000,  4, 0),
     ],
     "cross left wide":  [
-        (-.7,  3,  200,  0, 2),
-        (-.7,  1,   20,  8, 2),
-        (-.7,  0,   20,  9, 2),
-        (-.7, -1,   20, 10, 2),
-        (-.7, -3, 2000,  4, 0),
+        (  -.7,     3,  200,  0, 2),
+        (  -.7,     1,   20,  8, 2),
+        (  -.7,     0,   20,  9, 2),
+        (  -.7,    -1,   20, 10, 2),
+        (  -.7,    -3, 2000,  4, 0),
     ],
     "cross right": [
-        ( .4,  3,  200,  0, 2),
-        ( .4,  1,   20,  8, 2),
-        ( .4,  0,   20,  9, 2),
-        ( .4, -1,   20, 10, 2),
-        ( .4, -3, 2000,  4, 0),
+        (   .4,     3,  200,  0, 2),
+        (   .4,     1,   20,  8, 2),
+        (   .4,     0,   20,  9, 2),
+        (   .4,    -1,   20, 10, 2),
+        (   .4,    -3, 2000,  4, 0),
     ],
     "cross right wide": [
-        ( .7,  3,  200,  0, 2),
-        ( .7,  1,   20,  8, 2),
-        ( .7,  0,   20,  9, 2),
-        ( .7, -1,   20, 10, 2),
-        ( .7, -3, 2000,  4, 0),
+        (   .7,     3,  200,  0, 2),
+        (   .7,     1,   20,  8, 2),
+        (   .7,     0,   20,  9, 2),
+        (   .7,    -1,   20, 10, 2),
+        (   .7,    -3, 2000,  4, 0),
     ],
+    "loop right": [
+        (    3,     0,  110,  0, 3),
+        ( 2.25,  0.75,   10, 10, 4),
+        ( 1.50,  1.50,   10,  9, 4),
+        ( 0.75,  2.25,   10,  8, 4),
+        (    0,     3,   10,  0, 2),
+        (-0.75,  2.25,   10,  6, 4),
+        (-1.50,  1.50,   10,  5, 4),
+        (-2.25,  0.75,   10,  4, 4),
+        (   -3,     0,   10,  0, 1),
+        (-2.25, -0.75,   10,  2, 4),
+        (-1.50, -1.50,   10,  1, 4),
+        (-0.75, -2.25,   10,  0, 4),
+        (    0,    -3,   10,  0, 0),
+        ( 0.75, -2.25,   10, 14, 4),
+        ( 1.50, -1.50,   10, 13, 4),
+        ( 2.25, -0.75,   10, 12, 4),
+        (    3,     0, 2000,  0, 3),
+    ],
+    "loop left": [
+        (   -3,     0,  110,  0, 1),
+        (-2.25,  0.75,   10,  4, 4),
+        (-1.50,  1.50,   10,  5, 4),
+        (-0.75,  2.25,   10,  6, 4),
+        (    0,     3,   10,  0, 2),
+        ( 0.75,  2.25,   10,  8, 4),
+        ( 1.50,  1.50,   10,  9, 4),
+        ( 2.25,  0.75,   10, 10, 4),
+        (    3,     0,   10,  0, 3),
+        ( 2.25, -0.75,   10, 12, 4),
+        ( 1.50, -1.50,   10, 13, 4),
+        ( 0.75, -2.25,   10, 14, 4),
+        (    0,    -3,   10,  0, 0),
+        (-0.75, -2.25,   10,  0, 4),
+        (-1.50, -1.50,   10,  1, 4),
+        (-2.25, -0.75,   10,  2, 4),
+        (   -3,     0, 2000,  0, 1),
+    ],
+    "loop right double": [
+        (    3,     0,   50,  0, 3),
+        ( 2.25,  0.75,   10, 10, 4),
+        ( 1.50,  1.50,   10,  9, 4),
+        ( 0.75,  2.25,   10,  8, 4),
+        (    0,     3,   10,  0, 2),
+        (-0.75,  2.25,   10,  6, 4),
+        (-1.50,  1.50,   10,  5, 4),
+        (-2.25,  0.75,   10,  4, 4),
+        (   -3,     0,   10,  0, 1),
+        (-2.25, -0.75,   10,  2, 4),
+        (-1.50, -1.50,   10,  1, 4),
+        (-0.75, -2.25,   10,  0, 4),
+        (    0,    -3,   10,  0, 0),
+        ( 0.75, -2.25,   10, 14, 4),
+        ( 1.50, -1.50,   10, 13, 4),
+        ( 2.25, -0.75,   10, 12, 4),
+        (    3,     0,   50,  0, 3),
+        ( 2.25,  0.75,   10, 10, 4),
+        ( 1.50,  1.50,   10,  9, 4),
+        ( 0.75,  2.25,   10,  8, 4),
+        (    0,     3,   10,  0, 2),
+        (-0.75,  2.25,   10,  6, 4),
+        (-1.50,  1.50,   10,  5, 4),
+        (-2.25,  0.75,   10,  4, 4),
+        (   -3,     0,   10,  0, 1),
+        (-2.25, -0.75,   10,  2, 4),
+        (-1.50, -1.50,   10,  1, 4),
+        (-0.75, -2.25,   10,  0, 4),
+        (    0,    -3,   10,  0, 0),
+        ( 0.75, -2.25,   10, 14, 4),
+        ( 1.50, -1.50,   10, 13, 4),
+        ( 2.25, -0.75,   10, 12, 4),
+        (    3,     0, 2000,  0, 3),
+    ],
+
 }
 
 for i in range(len(MAP_TILES)):
@@ -218,7 +292,7 @@ class Bullet(pygame.sprite.Sprite):
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x:int|float, y:int|float, motion:list[tuple[int|float,int|float,int,int,int]], skip_frames:int = 0, skip_ticks:int = 0):
+    def __init__(self, x:int|float, y:int|float, motion:list[tuple[int|float,int|float,int,int,int]], skip_frames:int = 0, skip_ticks:int = 0, time_to_fire:int = -1):
         """
         Initialize an Enemy
         @param motion - a list of tuples(dx, dy, ticks, frame_x, frame_y)
@@ -234,6 +308,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = y
         self.x = x
         self.y = y
+        self._dead = False
+        self._fire_ticks = time_to_fire
+
         # self._prop_ticks = 0
 
     def update(self, keys):
@@ -252,32 +329,19 @@ class Enemy(pygame.sprite.Sprite):
         self._motion_ticks += 1
         self._dead = False
 
-        if not randint(0, 400):
+        if not self._fire_ticks:
             # Fire a bullet towards the player's current position
             dx = player.rect.x - self.rect.x
             dy = self.rect.y - player.rect.y
             mag = (dx ** 2 + dy ** 2) ** .5
+            mag = max(mag * 2, 2)
             dx /= mag
             dy /= mag
             bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height, "enemy", dx, dy)
             bullet.rect.x -= bullet.rect.width / 2
             live_sprites.add(bullet)
 
-        # self._prop_ticks += 1
-        # if not self._prop_ticks % 10:
-        #     self.update_propellers()
-        
-    # My trick of flipping the colors doesn't work because there are other parts of the sprite that are the same color
-    # def update_propellers(self):
-    #     prop_up   = (192, 192, 144)
-    #     prop_down = (128, 128,  80)
-    #     for y in range(self.rect.height):
-    #         for x in range(self.rect.width):
-    #             pixel = self.image.get_at((x, y))
-    #             if pixel == prop_up:
-    #                 self.image.set_at((x, y), prop_down)
-    #             elif pixel == prop_down:
-    #                 self.image.set_at((x, y), prop_up)
+        self._fire_ticks -= 1
 
     def kill(self):
         global score
@@ -288,14 +352,83 @@ class Enemy(pygame.sprite.Sprite):
         # TODO: Add death animation
 
 
-# [ (EnemyType, Constructor Arguments, Wait Time), ... ]
+# [ (WaitTime, EnemyType, ConstructorArguments), ... ]
 ENEMY_WAVES = [
-    (Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],       0,  25),   0),
-    (Enemy, (screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,  25),  20),
-    (Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,   0),  25),
-    (Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"], 0, -25),  20),
-    (Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],  0, -50), 325),
-    (Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],      0,  25),  50),
+    #region Right Loop Troupe
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    #endregion Right Loop Troupe
+    #region Left Loop Troupe
+    # (  0, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],       0,  0)),
+    # ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],       0,  0)),
+    # ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],       0,  0)),
+    # ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],       0,  0)),
+    # ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],       0,  0)),
+    #endregion Left Loop Troupe
+    #region Mixed Loop Troupe
+    # (100, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],       0,  0)),
+    # (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    # ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],       0,  0)),
+    # (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    # ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],       0,  0)),
+    # (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    # ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],       0,  0)),
+    # (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    # ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],       0,  0)),
+    # (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],      0,  0)),
+    #endregion Mixed Loop Troupe
+    #region Right Loop Double Troupe
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    # ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    #endregion Right Loop Double Troupe
+
+    (  0, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+    ( 20, Enemy, (screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+    ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+    ( 20, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],       0, -25, 160)),
+
+    (325, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50)),
+    ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0, 400)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0,  95)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+
+    (150, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+    ( 20, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+    ( 25, Enemy, (screenwidth - 3.5*ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+    ( 20, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],       0, -25, 160)),
+
+    (500, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50, 160)),
+    ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0, 400)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    (  0, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0,  95)),
+    (  0, Enemy, (-ENEMY_SIZE[0],                  -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 110)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0,  95)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+
+    (500, Enemy, (2.5 * ENEMY_SIZE[0],             -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50, 42)),
+    ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+    ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0,  15)),
+    ( 90, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0, 110)),
+    ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0,  73)),
+    ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0,  150)),
+    ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0)),
+    (  0, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+    ( 20, Enemy, (2 * ENEMY_SIZE[0],               -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],            0,  25)),
+    ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0,  15)),
+
+
+
 
     (None, None, -1), # Wait infinitely until the game ends
 ]
@@ -349,8 +482,8 @@ def start_game() -> int:
 
 
         #region SpawnEnemies
-        while wave_ticks == ENEMY_WAVES[wave][2]:
-            type, args, _ = ENEMY_WAVES[wave]
+        while wave_ticks == ENEMY_WAVES[wave][0]:
+            _, type, args = ENEMY_WAVES[wave]
             enemy = type(*args)
             hostile_sprites.add(enemy)
             live_sprites.add(enemy)
