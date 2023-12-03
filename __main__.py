@@ -44,6 +44,19 @@ player:Optional["Player"] = None
 SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert()
 PLAYER_SPRITESHEET = SpriteSheet("resources/img/Sprites.png", 8, 2, pygame.Rect(2, 0, 255, 50))
 MAP_SPRITESHEET = pygame.image.load("resources/img/MapTiles.png").convert()
+
+EXPLOSION_SPRITESHEET = SpriteSheet("resources/img/Explosion.png", 6, 1)
+EXPLOSION_IMAGES = EXPLOSION_SPRITESHEET.load_strip(0, 6)
+for i in range(len(EXPLOSION_IMAGES)):
+    EXPLOSION_IMAGES[i] = pygame.transform.scale(EXPLOSION_IMAGES[i], (EXPLOSION_IMAGES[i].get_width() * SCREEN_SCALE, EXPLOSION_IMAGES[i].get_height() * SCREEN_SCALE))
+del EXPLOSION_SPRITESHEET
+
+PLAYER_EXPLOSION_SPRITESHEET = SpriteSheet("resources/img/PlayerExplosion.png", 6, 1)
+PLAYER_EXPLOSION_IMAGES = PLAYER_EXPLOSION_SPRITESHEET.load_strip(0, 6)
+for i in range(len(PLAYER_EXPLOSION_IMAGES)):
+    PLAYER_EXPLOSION_IMAGES[i] = pygame.transform.scale(PLAYER_EXPLOSION_IMAGES[i], (PLAYER_EXPLOSION_IMAGES[i].get_width() * SCREEN_SCALE, PLAYER_EXPLOSION_IMAGES[i].get_height() * SCREEN_SCALE))
+del PLAYER_EXPLOSION_SPRITESHEET
+
 bullet_sprites = {
     "enemy":  SPRITESHEET.subsurface(pygame.Rect( 74,  89,   6,   6)),
     "player": SPRITESHEET.subsurface(pygame.Rect(101,  82,  15,  14)),
@@ -216,6 +229,13 @@ class Player(pygame.sprite.Sprite):
         self._fire_cooldown = 0
 
     def update(self, keys):
+        collisions = pygame.sprite.spritecollide(self, hostile_sprites, False)
+        if collisions:
+            for collision in collisions:
+                collision.kill()
+            self.kill()
+            return
+
         delta_lean = 0
         if self._fire_cooldown:
             self._fire_cooldown -= 1
@@ -261,6 +281,8 @@ class Player(pygame.sprite.Sprite):
 
     def kill(self):
         pygame.event.post(pygame.event.Event(GAME_OVER, {"win": False}))
+        explosion = Explosion(self.rect.x, self.rect.y, 1)
+        live_sprites.add(explosion)
         super().kill()
 
 
@@ -349,7 +371,33 @@ class Enemy(pygame.sprite.Sprite):
         if not self._dead:
             self._dead = True
             score += 50
-        # TODO: Add death animation
+            explosion = Explosion(self.rect.x, self.rect.y)
+            live_sprites.add(explosion)
+
+
+class Explosion(pygame.sprite.Sprite):
+    def __init__(self, x:int|float, y:int|float, type:int = 0):
+        """
+        Initialize an Explosion
+        @param type - 0: Enemy, 1: Player
+        """
+        pygame.sprite.Sprite.__init__(self)
+        self._images = EXPLOSION_IMAGES if type == 0 else PLAYER_EXPLOSION_IMAGES
+        self.image = self._images[0]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self._frame = 0
+        self._ticks = 0
+
+    def update(self, keys):
+        self._ticks += 1
+        if not self._ticks % 5:
+            self._frame += 1
+            if self._frame >= len(self._images):
+                self.kill()
+                return
+            self.image = self._images[self._frame]
 
 
 # [ (WaitTime, EnemyType, ConstructorArguments), ... ]
@@ -524,8 +572,9 @@ def start_game() -> int:
             game_over += 1
             if game_over > DEATH_SCREEN_TICKS:
                 return 0
-            text = LARGE_FONT.render("GAME OVER", True, red)
-            screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
+            if game_over > DEATH_SCREEN_TICKS / 6:
+                text = LARGE_FONT.render("GAME OVER", True, red)
+                screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
 
         pygame.display.flip()
         #endregion Draw
