@@ -25,11 +25,11 @@ screenwidth  = 200 * SCREEN_SCALE
 
 pygame.init()
 
-SMALL_FONT = pygame.font.Font("resources/fnt/1942.ttf", 10)
-MEDIUM_FONT = pygame.font.Font("resources/fnt/1942.ttf", 20)
-LARGE_FONT = pygame.font.Font("resources/fnt/1942.ttf", 35)
+SMALL_FONT = pygame.font.Font("resources/fnt/1942.ttf", 5 * SCREEN_SCALE)
+MEDIUM_FONT = pygame.font.Font("resources/fnt/1942.ttf", 10 * SCREEN_SCALE)
+LARGE_FONT = pygame.font.Font("resources/fnt/1942.ttf", int(17.5 * SCREEN_SCALE))
 
-screen = pygame.display.set_mode([screenwidth, screenheight], pygame.SCALED, vsync=1)
+screen = pygame.display.set_mode([screenwidth, screenheight], pygame.SCALED | pygame.RESIZABLE, vsync=1)
 clock = pygame.time.Clock()
 
 live_sprites = pygame.sprite.Group()
@@ -37,11 +37,16 @@ friendly_sprites = pygame.sprite.Group()
 hostile_sprites = pygame.sprite.Group()
 friendly_fire = pygame.sprite.Group()
 
-bgm = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
+BGM = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
+GAME_OVER_MUSIC = pygame.mixer.Sound("resources/sfx/GameOver.wav")
+EXPLOSION_SOUND = pygame.mixer.Sound("resources/sfx/Explosion.wav")
+FIZZLE_SOUND = pygame.mixer.Sound("resources/sfx/Fizzle.wav")
 score = 0
 player:Optional["Player"] = None
 
 SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert()
+LOGO = SPRITESHEET.subsurface(pygame.Rect(68, 704, 184, 49))
+LOGO = pygame.transform.scale(LOGO, (LOGO.get_width() * (SCREEN_SCALE / 1.5), LOGO.get_height() * (SCREEN_SCALE / 1.5)))
 PLAYER_SPRITESHEET = SpriteSheet("resources/img/Sprites.png", 8, 2, pygame.Rect(2, 0, 255, 50))
 MAP_SPRITESHEET = pygame.image.load("resources/img/MapTiles.png").convert()
 
@@ -285,6 +290,9 @@ class Player(pygame.sprite.Sprite):
         live_sprites.add(explosion)
         super().kill()
 
+    def delete(self):
+        super().kill()
+
 
 class Bullet(pygame.sprite.Sprite):
     _SPEED = 5 * SCREEN_SCALE
@@ -374,6 +382,9 @@ class Enemy(pygame.sprite.Sprite):
             explosion = Explosion(self.rect.x, self.rect.y)
             live_sprites.add(explosion)
 
+    def delete(self):
+        super().kill()
+
 
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, x:int|float, y:int|float, type:int = 0):
@@ -382,7 +393,13 @@ class Explosion(pygame.sprite.Sprite):
         @param type - 0: Enemy, 1: Player
         """
         pygame.sprite.Sprite.__init__(self)
-        self._images = EXPLOSION_IMAGES if type == 0 else PLAYER_EXPLOSION_IMAGES
+        if type == 0:
+            FIZZLE_SOUND.play()
+            self._images = EXPLOSION_IMAGES
+        else:
+            BGM.stop()
+            EXPLOSION_SOUND.play()
+            self._images = PLAYER_EXPLOSION_IMAGES
         self.image = self._images[0]
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -487,7 +504,7 @@ def start_game() -> int:
     Return 0 to restart the game, -1 to quit
     """
     global player
-    bgm.play(loops=-1)
+    BGM.play(loops=-1)
     pygame.display.set_caption("1942")
     running = True
     player = Player()
@@ -544,8 +561,7 @@ def start_game() -> int:
         if map_pos <= 0:
             if next_map_tile >= len(GAME_MAP):
                 # Do a proper end game, you win, blah blah blah
-                pygame.quit()
-                return
+                return 0
             map_tile, transfer_map_tile = transfer_map_tile, GAME_MAP[next_map_tile]
             next_map_tile += 1
             map_pos = transfer_map_pos
@@ -572,32 +588,57 @@ def start_game() -> int:
             game_over += 1
             if game_over > DEATH_SCREEN_TICKS:
                 return 0
-            if game_over > DEATH_SCREEN_TICKS / 6:
+            if game_over > DEATH_SCREEN_TICKS // 8:
                 text = LARGE_FONT.render("GAME OVER", True, red)
                 screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
+            elif game_over == DEATH_SCREEN_TICKS // 8:
+                GAME_OVER_MUSIC.play()
+
 
         pygame.display.flip()
         #endregion Draw
 
         clock.tick(60)
-    pygame.quit()
     return -1
 
 def cleanup() -> None:
     global score
     seed("1942")
-    print(live_sprites, friendly_sprites, hostile_sprites, friendly_fire)
     for sprite in live_sprites.sprites():
-        sprite.kill()
-    print(live_sprites, friendly_sprites, hostile_sprites, friendly_fire)
-    pygame.mixer.stop()
+        (sprite.delete or sprite.kill)()
     screen.fill(black)
     pygame.display.flip()
     score = 0
 
+def main_menu() -> bool:
+    global screen, clock
+    pygame.display.set_caption("1942")
+    running = True
+    ticks = 0
+    while running:
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                return False
+            elif event.type == KEYDOWN and event.key == K_RETURN:
+                return True
+
+        screen.fill(black)
+        screen.blit(LOGO, ((screenwidth - LOGO.get_width()) / 2, screenheight / 2 - LOGO.get_height()))
+        text = SMALL_FONT.render("Press Enter to Start", True, white)
+        screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2 + 2 * text.get_height()))
+        pygame.display.flip()
+        clock.tick(60)
+
 def main() -> None:
+    if not main_menu():
+        return
     while not start_game():
         cleanup()
+        if not main_menu(): 
+            break
+    pygame.quit()
+    return
+
 
 
 
