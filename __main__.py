@@ -4,90 +4,16 @@ from spritesheet import SpriteSheet
 from random import randint, seed
 from typing import Optional
 from abc import ABC, abstractmethod
+from bullet import Bullet
+from config import SCREEN_SCALE
+import config as cfg
+from config import ENEMY_SIZE, screenheight, screenwidth
+from character import Player, Enemy
 
-
-GAME_OVER  = pygame.USEREVENT + 0
-
-DEATH_SCREEN_TICKS = 500
-
-seed("1942")
-
-white = (255, 255, 255)
-black = (  0,   0,   0)
-red   = (255,   0,   0)
-green = (  0, 255,   0)
-grey  = ( 31,  31,  31)
-
-SCREEN_SCALE = 2
-SCROLL_SPEED = 1
-
-screenheight = 400 * SCREEN_SCALE
-screenwidth  = 200 * SCREEN_SCALE
 
 pygame.init()
+cfg.init()
 
-SMALL_FONT = pygame.font.Font("resources/fnt/1942.ttf", 5 * SCREEN_SCALE)
-MEDIUM_FONT = pygame.font.Font("resources/fnt/1942.ttf", 10 * SCREEN_SCALE)
-LARGE_FONT = pygame.font.Font("resources/fnt/1942.ttf", int(17.5 * SCREEN_SCALE))
-
-screen = pygame.display.set_mode([screenwidth, screenheight], pygame.SCALED | pygame.RESIZABLE, vsync=1)
-clock = pygame.time.Clock()
-
-live_sprites = pygame.sprite.Group()
-friendly_sprites = pygame.sprite.Group()
-hostile_sprites = pygame.sprite.Group()
-friendly_fire = pygame.sprite.Group()
-
-BGM = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
-GAME_OVER_MUSIC = pygame.mixer.Sound("resources/sfx/GameOver.wav")
-EXPLOSION_SOUND = pygame.mixer.Sound("resources/sfx/Explosion.wav")
-FIZZLE_SOUND = pygame.mixer.Sound("resources/sfx/Fizzle.wav")
-score = 0
-player:Optional["Player"] = None
-
-SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert()
-LOGO = SPRITESHEET.subsurface(pygame.Rect(68, 704, 184, 49))
-LOGO = pygame.transform.scale(LOGO, (LOGO.get_width() * (SCREEN_SCALE / 1.5), LOGO.get_height() * (SCREEN_SCALE / 1.5)))
-PLAYER_SPRITESHEET = SpriteSheet("resources/img/Sprites.png", 8, 2, pygame.Rect(2, 0, 255, 50))
-MAP_SPRITESHEET = pygame.image.load("resources/img/MapTiles.png").convert()
-
-EXPLOSION_SPRITESHEET = SpriteSheet("resources/img/Explosion.png", 6, 1)
-EXPLOSION_IMAGES = EXPLOSION_SPRITESHEET.load_strip(0, 6)
-for i in range(len(EXPLOSION_IMAGES)):
-    EXPLOSION_IMAGES[i] = pygame.transform.scale(EXPLOSION_IMAGES[i], (EXPLOSION_IMAGES[i].get_width() * SCREEN_SCALE, EXPLOSION_IMAGES[i].get_height() * SCREEN_SCALE))
-del EXPLOSION_SPRITESHEET
-
-PLAYER_EXPLOSION_SPRITESHEET = SpriteSheet("resources/img/PlayerExplosion.png", 6, 1)
-PLAYER_EXPLOSION_IMAGES = PLAYER_EXPLOSION_SPRITESHEET.load_strip(0, 6)
-for i in range(len(PLAYER_EXPLOSION_IMAGES)):
-    PLAYER_EXPLOSION_IMAGES[i] = pygame.transform.scale(PLAYER_EXPLOSION_IMAGES[i], (PLAYER_EXPLOSION_IMAGES[i].get_width() * SCREEN_SCALE, PLAYER_EXPLOSION_IMAGES[i].get_height() * SCREEN_SCALE))
-del PLAYER_EXPLOSION_SPRITESHEET
-
-bullet_sprites = {
-    "enemy":  SPRITESHEET.subsurface(pygame.Rect( 74,  89,   6,   6)),
-    "player": SPRITESHEET.subsurface(pygame.Rect(101,  82,  15,  14)),
-}
-
-for k in bullet_sprites.keys():
-    bullet_sprites[k] = pygame.transform.scale(bullet_sprites[k], (bullet_sprites[k].get_width() * SCREEN_SCALE, bullet_sprites[k].get_height() * SCREEN_SCALE))
-
-ocean_raw = MAP_SPRITESHEET.subsurface(pygame.Rect(0, 0, 225, 175))
-ocean = pygame.surface.Surface((255, 500))
-height = ocean_raw.get_height()
-for i in range(4):
-    ocean.blit(ocean_raw, (0, height * i))
-
-del ocean_raw
-
-MAP_TILES = [
-    ocean,                                                      # Ocean
-    MAP_SPRITESHEET.subsurface(pygame.Rect(0,   0, 225,  502)), # Carrier
-    MAP_SPRITESHEET.subsurface(pygame.Rect(0, 620, 225, 1428)), # Forest 1
-]
-
-for i in range(len(MAP_TILES)):
-    tile = MAP_TILES[i]
-    MAP_TILES[i] = pygame.transform.scale(tile, (tile.get_width() * SCREEN_SCALE, tile.get_height() * SCREEN_SCALE))
 
 GAME_MAP = [
     0, # Ocean
@@ -100,13 +26,6 @@ GAME_MAP = [
     1, # Carrier
 ]
 
-ENEMY_SPRITES = SpriteSheet.from_size("resources/img/Enemies.png", 15, 16, 4, 4)
-for y in range(len(ENEMY_SPRITES)):
-    for x in range(len(ENEMY_SPRITES[y])):
-        sprite = ENEMY_SPRITES[y][x]
-        ENEMY_SPRITES[y][x] = pygame.transform.scale(sprite, (sprite.get_width() * SCREEN_SCALE, sprite.get_height() * SCREEN_SCALE))
-
-ENEMY_SIZE = (15 * SCREEN_SCALE, 16 * SCREEN_SCALE)
 
 # 0: dx, 1: dy, 2: ticks, 3: frame_x, 4: frame_y
 ENEMY_PATHS = {
@@ -215,208 +134,6 @@ ENEMY_PATHS = {
 }
 
 
-class Character(pygame.sprite.Sprite, ABC):
-    @abstractmethod
-    def hit(self):
-        """Called when the character is hit by an object"""
-
-
-class Player(Character):
-    _L_SPEED = .3                 # Lean speed
-    _H_SPEED = 2   * SCREEN_SCALE # Horizontal speed
-    _V_SPEED = 2.5 * SCREEN_SCALE # Vertical speed
-    _FIRE_COOLDOWN = 6
-    _MAX_SHOTS = 3
-    
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self._images = PLAYER_SPRITESHEET.load_strip(0, 7)
-        self.image = self._images[0]
-        self.image = pygame.transform.scale(self.image, (self.image.get_width() * SCREEN_SCALE, self.image.get_height() * SCREEN_SCALE))
-        self.rect = pygame.Rect((screenwidth - 62) / 2, screenheight - 75, 62, 50)
-        self._anim = 0
-        self._frame = 0
-        self._tilt_frames = [self._images[6], self._images[4], self._images[2], self._images[0], self._images[1], self._images[3], self._images[5]]
-        self._lean = 0
-        self._prop_ticks = 0
-        self._fire_cooldown = 0
-
-    def update(self, keys):
-        collisions = pygame.sprite.spritecollide(self, hostile_sprites, False)
-        if collisions:
-            for collision in collisions:
-                collision.hit()
-            self.hit()
-            return
-
-        delta_lean = 0
-        if self._fire_cooldown:
-            self._fire_cooldown -= 1
-        if keys[K_RIGHT] and self.rect.x + self.rect.width < screenwidth - 5:
-            self.rect.x += self._H_SPEED
-            delta_lean += self._L_SPEED
-        if keys[K_LEFT] and self.rect.x > 0:
-            self.rect.x -= self._H_SPEED
-            delta_lean -= self._L_SPEED
-        if keys[K_UP] and self.rect.y > 0:
-            self.rect.y -= self._V_SPEED
-        if keys[K_DOWN] and self.rect.y + self.rect.height < screenheight:
-            self.rect.y += self._V_SPEED
-        if keys[K_SPACE] and (not self._fire_cooldown) and len(friendly_fire) < self._MAX_SHOTS:
-            bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y - 5 * SCREEN_SCALE, "player", 0, 1)
-            bullet.rect.x -= bullet.rect.width / 2
-            live_sprites.add(bullet)
-            friendly_fire.add(bullet)
-            self._fire_cooldown = self._FIRE_COOLDOWN
-        if not delta_lean and self._lean:
-            delta_lean = -self._L_SPEED if self._lean > 0 else self._L_SPEED
-        self._lean = max(-3, min(self._lean + delta_lean, 3))
-
-        lean = round(self._lean)
-        if lean:
-            self.image = self._tilt_frames[lean + 3]
-            self.image = pygame.transform.scale(self.image, (self.image.get_width() * SCREEN_SCALE, self.image.get_height() * SCREEN_SCALE))
-
-        self._prop_ticks += 1
-        if not self._prop_ticks % 10:
-            self.update_propellers()
-
-    def update_propellers(self):
-        prop_up   = (176, 224,   0)
-        prop_down = (144, 192,   0)
-        for y in range(self.rect.height):
-            for x in range(self.rect.width):
-                pixel = self.image.get_at((x, y))
-                if pixel == prop_up:
-                    self.image.set_at((x, y), prop_down)
-                elif pixel == prop_down:
-                    self.image.set_at((x, y), prop_up)
-
-    def hit(self):
-        pygame.event.post(pygame.event.Event(GAME_OVER, {"win": False}))
-        explosion = Explosion(self.rect.x, self.rect.y, 1)
-        live_sprites.add(explosion)
-        super().kill()
-
-
-class Bullet(pygame.sprite.Sprite):
-    _SPEED = 5 * SCREEN_SCALE
-    def __init__(self, x, y, style, dx, dy):
-        pygame.sprite.Sprite.__init__(self)
-        if style not in bullet_sprites.keys():
-            raise ValueError(f"Invalid bullet style: {style}")
-        self.image = bullet_sprites[style]
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self._style = style
-        self._dx = dx
-        self._dy = dy
-
-    def update(self, keys):
-        self.rect.y -= self._SPEED * self._dy
-        self.rect.x += self._SPEED * self._dx
-        if self.rect.y < -self.rect.height:
-            self.kill()
-            return
-        targets = friendly_sprites if self._style == "enemy" else hostile_sprites
-        collisions = pygame.sprite.spritecollide(self, targets, False)
-        for collision in collisions:
-            collision.hit()
-            self.kill()
-
-
-class Enemy(Character):
-    def __init__(self, x:int|float, y:int|float, motion:list[tuple[int|float,int|float,int,int,int]], skip_frames:int = 0, skip_ticks:int = 0, time_to_fire:int = -1):
-        """
-        Initialize an Enemy
-        @param motion - a list of tuples(dx, dy, ticks, frame_x, frame_y)
-        """
-        pygame.sprite.Sprite.__init__(self)
-        self._motion = motion
-        self._motion_index = skip_frames
-        self._motion_ticks = skip_ticks
-        self._dx, self._dy, _, frame_x, frame_y = self._motion[self._motion_index]
-        self.image = ENEMY_SPRITES[frame_x][frame_y]
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.x = x
-        self.y = y
-        self._dead = False
-        self._fire_ticks = time_to_fire
-
-        # self._prop_ticks = 0
-
-    def update(self, keys):
-        if self._motion_ticks >= self._motion[self._motion_index][2]:
-            self._motion_ticks = 0
-            self._motion_index += 1
-            if self._motion_index >= len(self._motion):
-                super().kill()
-                return
-            self._dx, self._dy, _, frame_x, frame_y = self._motion[self._motion_index]
-            self.image = ENEMY_SPRITES[frame_x][frame_y]
-        self.x += self._dx
-        self.y += self._dy
-        self.rect.x = self.x
-        self.rect.y = self.y
-        self._motion_ticks += 1
-        self._dead = False
-
-        if not self._fire_ticks:
-            # Fire a bullet towards the player's current position
-            dx = player.rect.x - self.rect.x
-            dy = self.rect.y - player.rect.y
-            mag = (dx ** 2 + dy ** 2) ** .5
-            mag = max(mag * 2, 2)
-            dx /= mag
-            dy /= mag
-            bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height, "enemy", dx, dy)
-            bullet.rect.x -= bullet.rect.width / 2
-            live_sprites.add(bullet)
-
-        self._fire_ticks -= 1
-
-    def hit(self):
-        global score
-        super().kill()
-        if not self._dead:
-            self._dead = True
-            score += 50
-            explosion = Explosion(self.rect.x, self.rect.y)
-            live_sprites.add(explosion)
-
-
-class Explosion(pygame.sprite.Sprite):
-    def __init__(self, x:int|float, y:int|float, type:int = 0):
-        """
-        Initialize an Explosion
-        @param type - 0: Enemy, 1: Player
-        """
-        pygame.sprite.Sprite.__init__(self)
-        if type == 0:
-            FIZZLE_SOUND.play()
-            self._images = EXPLOSION_IMAGES
-        else:
-            BGM.stop()
-            EXPLOSION_SOUND.play()
-            self._images = PLAYER_EXPLOSION_IMAGES
-        self.image = self._images[0]
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self._frame = 0
-        self._ticks = 0
-
-    def update(self, keys):
-        self._ticks += 1
-        if not self._ticks % 5:
-            self._frame += 1
-            if self._frame >= len(self._images):
-                self.kill()
-                return
-            self.image = self._images[self._frame]
 
 
 # [ (WaitTime, EnemyType, ConstructorArguments), ... ]
@@ -522,29 +239,28 @@ def start_game() -> int:
     Start the game loop.
     Return 0 to restart the game, -1 to quit
     """
-    global player
-    BGM.play(loops=-1)
+    cfg.BGM.play(loops=-1)
     pygame.display.set_caption("1942")
     running = True
-    player = Player()
-    friendly_sprites.add(player)
-    live_sprites.add(player)
+    cfg.player = Player()
+    cfg.friendly_sprites.add(cfg.player)
+    cfg.live_sprites.add(cfg.player)
     map_tile = GAME_MAP[0]
     transfer_map_tile = GAME_MAP[1]
     map_pos  = 200
-    transfer_map_pos = map_pos + MAP_TILES[transfer_map_tile].get_height()
+    transfer_map_pos = map_pos + cfg.MAP_TILES[transfer_map_tile].get_height()
     next_map_tile = 2
     wave_ticks = 0
     wave = 0
     paused = False
     game_over = 0
-    score_text = SMALL_FONT.render("Score", True, red)
+    score_text = cfg.SMALL_FONT.render("Score", True, cfg.red)
     while running:
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
                 break
-            elif event.type == GAME_OVER:
+            elif event.type == cfg.GAME_OVER:
                 game_over = 1
             elif event.type == KEYDOWN and (not game_over) and event.key == K_ESCAPE:
                 if paused:
@@ -553,8 +269,8 @@ def start_game() -> int:
                 else:
                     pygame.mixer.pause()
                     paused = True
-                    text = LARGE_FONT.render("PAUSED", True, red)
-                    screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
+                    text = cfg.LARGE_FONT.render("PAUSED", True, cfg.red)
+                    cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
                     pygame.display.flip()
 
         if paused:
@@ -562,15 +278,15 @@ def start_game() -> int:
 
 
         keys = pygame.key.get_pressed()
-        live_sprites.update(keys)
+        cfg.live_sprites.update(keys)
 
 
         #region SpawnEnemies
         while wave_ticks == ENEMY_WAVES[wave][0]:
             _, type, args = ENEMY_WAVES[wave]
             enemy = type(*args)
-            hostile_sprites.add(enemy)
-            live_sprites.add(enemy)
+            cfg.hostile_sprites.add(enemy)
+            cfg.live_sprites.add(enemy)
             wave_ticks = 0
             wave += 1
         wave_ticks += 1
@@ -584,53 +300,51 @@ def start_game() -> int:
             map_tile, transfer_map_tile = transfer_map_tile, GAME_MAP[next_map_tile]
             next_map_tile += 1
             map_pos = transfer_map_pos
-            transfer_map_pos = map_pos + MAP_TILES[transfer_map_tile].get_height()
-        map_pos -= SCROLL_SPEED
-        transfer_map_pos -= SCROLL_SPEED
+            transfer_map_pos = map_pos + cfg.MAP_TILES[transfer_map_tile].get_height()
+        map_pos -= cfg.SCROLL_SPEED
+        transfer_map_pos -= cfg.SCROLL_SPEED
         #endregion MapScrolling
 
 
         #region Draw
-        screen.fill(grey)
+        cfg.screen.fill(cfg.grey)
 
-        screen.blit(MAP_TILES[map_tile], (0, screenheight - map_pos))
-        screen.blit(MAP_TILES[transfer_map_tile], (0, screenheight - transfer_map_pos))
+        cfg.screen.blit(cfg.MAP_TILES[map_tile], (0, screenheight - map_pos))
+        cfg.screen.blit(cfg.MAP_TILES[transfer_map_tile], (0, screenheight - transfer_map_pos))
 
-        # pygame.draw.rect(screen, red, player.rect, 1)
-        live_sprites.draw(screen)
+        # pygame.draw.rect(cfg.screen, red, cfg.player.rect, 1)
+        cfg.live_sprites.draw(cfg.screen)
 
-        screen.blit(score_text, ((screenwidth - score_text.get_width()) / 2, 5 * SCREEN_SCALE))
-        text = SMALL_FONT.render(str(score), True, white)
-        screen.blit(text, ((screenwidth - text.get_width()) / 2, score_text.get_height() + 7 * SCREEN_SCALE))
+        cfg.screen.blit(score_text, ((screenwidth - score_text.get_width()) / 2, 5 * SCREEN_SCALE))
+        text = cfg.SMALL_FONT.render(str(cfg.score), True, cfg.white)
+        cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, score_text.get_height() + 7 * SCREEN_SCALE))
 
         if game_over:
             game_over += 1
-            if game_over > DEATH_SCREEN_TICKS:
+            if game_over > cfg.DEATH_SCREEN_TICKS:
                 return 0
-            if game_over > DEATH_SCREEN_TICKS // 8:
-                text = LARGE_FONT.render("GAME OVER", True, red)
-                screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
-            elif game_over == DEATH_SCREEN_TICKS // 8:
-                GAME_OVER_MUSIC.play()
+            if game_over > cfg.DEATH_SCREEN_TICKS // 8:
+                text = cfg.LARGE_FONT.render("GAME OVER", True, cfg.red)
+                cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
+            elif game_over == cfg.DEATH_SCREEN_TICKS // 8:
+                cfg.GAME_OVER_MUSIC.play()
 
 
         pygame.display.flip()
         #endregion Draw
 
-        clock.tick(60)
+        cfg.clock.tick(60)
     return -1
 
 def cleanup() -> None:
-    global score
     seed("1942")
-    for sprite in live_sprites.sprites():
+    for sprite in cfg.live_sprites.sprites():
         sprite.kill()
-    screen.fill(black)
+    cfg.screen.fill(cfg.black)
     pygame.display.flip()
-    score = 0
+    cfg.score = 0
 
 def main_menu() -> bool:
-    global screen, clock
     pygame.display.set_caption("1942")
     running = True
     ticks = 0
@@ -641,12 +355,12 @@ def main_menu() -> bool:
             elif event.type == KEYDOWN and event.key == K_RETURN:
                 return True
 
-        screen.fill(black)
-        screen.blit(LOGO, ((screenwidth - LOGO.get_width()) / 2, screenheight / 2 - LOGO.get_height()))
-        text = SMALL_FONT.render("Press Enter to Start", True, white)
-        screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2 + 2 * text.get_height()))
+        cfg.screen.fill(cfg.black)
+        cfg.screen.blit(cfg.LOGO, ((screenwidth - cfg.LOGO.get_width()) / 2, screenheight / 2 - cfg.LOGO.get_height()))
+        text = cfg.SMALL_FONT.render("Press Enter to Start", True, cfg.white)
+        cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2 + 2 * text.get_height()))
         pygame.display.flip()
-        clock.tick(60)
+        cfg.clock.tick(60)
 
 def main() -> None:
     if not main_menu():
