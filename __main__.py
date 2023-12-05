@@ -3,6 +3,7 @@ from pygame.locals import *
 from spritesheet import SpriteSheet
 from random import randint, seed
 from typing import Optional
+from abc import ABC, abstractmethod
 
 
 GAME_OVER  = pygame.USEREVENT + 0
@@ -84,12 +85,16 @@ MAP_TILES = [
     MAP_SPRITESHEET.subsurface(pygame.Rect(0, 620, 225, 1428)), # Forest 1
 ]
 
+for i in range(len(MAP_TILES)):
+    tile = MAP_TILES[i]
+    MAP_TILES[i] = pygame.transform.scale(tile, (tile.get_width() * SCREEN_SCALE, tile.get_height() * SCREEN_SCALE))
+
 GAME_MAP = [
     0, # Ocean
     1, # Carrier
     0, # Ocean
-    0, # Ocean
-    0, # Ocean
+    # 0, # Ocean
+    # 0, # Ocean
     2, # Forest 1
     0, # Ocean
     1, # Carrier
@@ -209,11 +214,14 @@ ENEMY_PATHS = {
 
 }
 
-for i in range(len(MAP_TILES)):
-    tile = MAP_TILES[i]
-    MAP_TILES[i] = pygame.transform.scale(tile, (tile.get_width() * SCREEN_SCALE, tile.get_height() * SCREEN_SCALE))
 
-class Player(pygame.sprite.Sprite):
+class Character(pygame.sprite.Sprite, ABC):
+    @abstractmethod
+    def hit(self):
+        """Called when the character is hit by an object"""
+
+
+class Player(Character):
     _L_SPEED = .3                 # Lean speed
     _H_SPEED = 2   * SCREEN_SCALE # Horizontal speed
     _V_SPEED = 2.5 * SCREEN_SCALE # Vertical speed
@@ -237,8 +245,8 @@ class Player(pygame.sprite.Sprite):
         collisions = pygame.sprite.spritecollide(self, hostile_sprites, False)
         if collisions:
             for collision in collisions:
-                collision.kill()
-            self.kill()
+                collision.hit()
+            self.hit()
             return
 
         delta_lean = 0
@@ -284,13 +292,10 @@ class Player(pygame.sprite.Sprite):
                 elif pixel == prop_down:
                     self.image.set_at((x, y), prop_up)
 
-    def kill(self):
+    def hit(self):
         pygame.event.post(pygame.event.Event(GAME_OVER, {"win": False}))
         explosion = Explosion(self.rect.x, self.rect.y, 1)
         live_sprites.add(explosion)
-        super().kill()
-
-    def delete(self):
         super().kill()
 
 
@@ -315,13 +320,13 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
             return
         targets = friendly_sprites if self._style == "enemy" else hostile_sprites
-        collisions = pygame.sprite.spritecollide(self, targets, True)
+        collisions = pygame.sprite.spritecollide(self, targets, False)
         for collision in collisions:
-            collision.kill()
+            collision.hit()
             self.kill()
 
 
-class Enemy(pygame.sprite.Sprite):
+class Enemy(Character):
     def __init__(self, x:int|float, y:int|float, motion:list[tuple[int|float,int|float,int,int,int]], skip_frames:int = 0, skip_ticks:int = 0, time_to_fire:int = -1):
         """
         Initialize an Enemy
@@ -373,7 +378,7 @@ class Enemy(pygame.sprite.Sprite):
 
         self._fire_ticks -= 1
 
-    def kill(self):
+    def hit(self):
         global score
         super().kill()
         if not self._dead:
@@ -381,9 +386,6 @@ class Enemy(pygame.sprite.Sprite):
             score += 50
             explosion = Explosion(self.rect.x, self.rect.y)
             live_sprites.add(explosion)
-
-    def delete(self):
-        super().kill()
 
 
 class Explosion(pygame.sprite.Sprite):
@@ -491,6 +493,23 @@ ENEMY_WAVES = [
     (  0, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
     ( 20, Enemy, (2 * ENEMY_SIZE[0],               -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],            0,  25)),
     ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0,  15)),
+
+    (250, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["cross right"],            0, 175,  20)),
+    ( 10, Enemy, (screenwidth,                   screenheight / 3,  ENEMY_PATHS["cross left"],            0, 170,  10)),
+    ( 10, Enemy, (2.5 * ENEMY_SIZE[0],             -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50,  42)),
+    (  5, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+    ( 15, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+    ( 20, Enemy, (screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+    ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+    ( 20, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],       0, -25, 160)),
+
+    (325, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50)),
+    ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0, 400)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0,  95)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+    ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
 
 
 
@@ -605,7 +624,7 @@ def cleanup() -> None:
     global score
     seed("1942")
     for sprite in live_sprites.sprites():
-        (sprite.delete or sprite.kill)()
+        sprite.kill()
     screen.fill(black)
     pygame.display.flip()
     score = 0
