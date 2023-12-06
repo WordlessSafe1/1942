@@ -145,8 +145,17 @@ def main_menu() -> bool:
                 return False
             elif event.type == KEYDOWN and event.key == K_RETURN:
                 return True
+            elif event.type == KEYDOWN and event.key == K_TAB:
+                match(cfg.control_scheme):
+                    case "arrows":   cfg.control_scheme = "wasd"
+                    case "wasd":     cfg.control_scheme = "vim"
+                    case "vim":      cfg.control_scheme = "arrows"
 
         cfg.screen.fill(cfg.black)
+        text = cfg.TINY_FONT.render("Control Scheme: " + cfg.control_scheme, True, cfg.white)
+        cfg.screen.blit(text, (5 * SCREEN_SCALE, text.get_height()))
+        text = cfg.TINY_FONT.render("(TAB to change)", True, cfg.white)
+        cfg.screen.blit(text, (5 * SCREEN_SCALE, 3 * text.get_height()))
         cfg.screen.blit(cfg.LOGO, ((screenwidth - cfg.LOGO.get_width()) / 2, screenheight / 2 - cfg.LOGO.get_height()))
         text = cfg.SMALL_FONT.render("Press Enter to Start", True, cfg.white)
         cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2 + 2 * text.get_height()))

@@ -18,6 +18,7 @@ SCROLL_SPEED = 1
 screenheight = 400 * SCREEN_SCALE
 screenwidth  = 200 * SCREEN_SCALE
 
+TINY_FONT:   pygame.font.Font = None
 SMALL_FONT:  pygame.font.Font = None
 MEDIUM_FONT: pygame.font.Font = None
 LARGE_FONT:  pygame.font.Font = None
@@ -55,19 +56,20 @@ ENEMY_SIZE = (15 * SCREEN_SCALE, 16 * SCREEN_SCALE)
 player = None
 score: int = 0
 
-CONTROL_SCHEMES = {
+CONTROLS = {
     "arrows":   [K_UP, K_LEFT, K_DOWN, K_RIGHT, K_SPACE],
     "wasd":     [K_w, K_a, K_s, K_d, K_SPACE],
     "vim":      [K_k, K_h, K_j, K_l, K_SPACE],
 }
 
-control_scheme = CONTROL_SCHEMES["wasd"]
+control_scheme = "wasd"
 
 
 def init():
-    global screen, clock, SMALL_FONT, MEDIUM_FONT, LARGE_FONT
+    global screen, clock, TINY_FONT, SMALL_FONT, MEDIUM_FONT, LARGE_FONT
     screen = pygame.display.set_mode([screenwidth, screenheight], pygame.SCALED, vsync=1)
     clock = pygame.time.Clock()
+    TINY_FONT = pygame.font.Font("resources/fnt/1942.ttf", int(3.5 * SCREEN_SCALE))
     SMALL_FONT = pygame.font.Font("resources/fnt/1942.ttf", 5 * SCREEN_SCALE)
     MEDIUM_FONT = pygame.font.Font("resources/fnt/1942.ttf", 10 * SCREEN_SCALE)
     LARGE_FONT = pygame.font.Font("resources/fnt/1942.ttf", int(17.5 * SCREEN_SCALE))
