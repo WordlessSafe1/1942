@@ -43,17 +43,17 @@ class Player(Character):
         delta_lean = 0
         if self._fire_cooldown:
             self._fire_cooldown -= 1
-        if keys[K_RIGHT] and self.rect.x + self.rect.width < screenwidth - 5:
+        if keys[cfg.control_scheme[3]] and self.rect.x + self.rect.width < screenwidth - 5:
             self.rect.x += self._H_SPEED
             delta_lean += self._L_SPEED
-        if keys[K_LEFT] and self.rect.x > 0:
+        if keys[cfg.control_scheme[1]] and self.rect.x > 0:
             self.rect.x -= self._H_SPEED
             delta_lean -= self._L_SPEED
-        if keys[K_UP] and self.rect.y > 0:
+        if keys[cfg.control_scheme[0]] and self.rect.y > 0:
             self.rect.y -= self._V_SPEED
-        if keys[K_DOWN] and self.rect.y + self.rect.height < screenheight:
+        if keys[cfg.control_scheme[2]] and self.rect.y + self.rect.height < screenheight:
             self.rect.y += self._V_SPEED
-        if keys[K_SPACE] and (not self._fire_cooldown) and len(cfg.friendly_fire) < self._MAX_SHOTS:
+        if keys[cfg.control_scheme[4]] and (not self._fire_cooldown) and len(cfg.friendly_fire) < self._MAX_SHOTS:
             bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y - 5 * SCREEN_SCALE, "player", 0, 1)
             bullet.rect.x -= bullet.rect.width / 2
             cfg.live_sprites.add(bullet)

@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 from spritesheet import SpriteSheet
 
 GAME_OVER  = pygame.USEREVENT + 0
@@ -53,6 +54,15 @@ ENEMY_SIZE = (15 * SCREEN_SCALE, 16 * SCREEN_SCALE)
 
 player = None
 score: int = 0
+
+CONTROL_SCHEMES = {
+    "arrows":   [K_UP, K_LEFT, K_DOWN, K_RIGHT, K_SPACE],
+    "wasd":     [K_w, K_a, K_s, K_d, K_SPACE],
+    "vim":      [K_k, K_h, K_j, K_l, K_SPACE],
+}
+
+control_scheme = CONTROL_SCHEMES["wasd"]
+
 
 def init():
     global screen, clock, SMALL_FONT, MEDIUM_FONT, LARGE_FONT

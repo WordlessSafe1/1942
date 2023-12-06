@@ -74,6 +74,21 @@ def start_game() -> int:
         if map_pos <= 0:
             if next_map_tile >= len(level.GAME_MAP):
                 # Do a proper end game, you win, blah blah blah
+                ticks = 0
+                cfg.screen.fill(cfg.black)
+                cfg.screen.blit(cfg.LOGO, ((screenwidth - cfg.LOGO.get_width()) / 2, screenheight / 2 - cfg.LOGO.get_height()))
+                win_msg = cfg.LARGE_FONT.render("YOU WIN", True, cfg.white)
+                cfg.screen.blit(win_msg, ((screenwidth - win_msg.get_width()) / 2, (screenheight + win_msg.get_height()) / 2))
+                text = cfg.SMALL_FONT.render(f"Score: {cfg.score}", True, cfg.white)
+                cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight + text.get_height()) / 2 + win_msg.get_height() + 2 * text.get_height()))
+                pygame.display.flip()
+                while ticks < 500:
+                    for event in pygame.event.get():
+                        if event.type == QUIT:
+                            running = False
+                            break
+                    cfg.clock.tick(60)
+                    ticks += 1
                 return 0
             map_tile, transfer_map_tile = transfer_map_tile, level.GAME_MAP[next_map_tile]
             next_map_tile += 1
