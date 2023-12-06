@@ -163,6 +163,9 @@ def main_menu() -> bool:
         cfg.clock.tick(60)
 
 def main() -> None:
+    pygame.display.set_caption("1942")
+    pygame.display.set_icon(cfg.ENEMY_SPRITES[0][1])
+
     if not main_menu():
         return
     while not start_game():
