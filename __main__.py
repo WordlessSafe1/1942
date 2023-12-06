@@ -17,6 +17,7 @@ def start_game() -> int:
     Start the game loop.
     Return 0 to restart the game, -1 to quit
     """
+    #region Setup
     cfg.BGM.play(loops=-1)
     pygame.display.set_caption("1942")
     running = True
@@ -33,7 +34,9 @@ def start_game() -> int:
     paused = False
     game_over = 0
     score_text = cfg.SMALL_FONT.render("Score", True, cfg.red)
+    #endregion Setup
     while running:
+        #region Events
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
@@ -50,14 +53,13 @@ def start_game() -> int:
                     text = cfg.LARGE_FONT.render("PAUSED", True, cfg.red)
                     cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
                     pygame.display.flip()
+        #endregion Events
 
         if paused:
             continue
 
-
         keys = pygame.key.get_pressed()
         cfg.live_sprites.update(keys)
-
 
         #region SpawnEnemies
         while wave_ticks == level.ENEMY_WAVES[wave][0]:
@@ -73,7 +75,6 @@ def start_game() -> int:
         #region MapScrolling
         if map_pos <= 0:
             if next_map_tile >= len(level.GAME_MAP):
-                # Do a proper end game, you win, blah blah blah
                 ticks = 0
                 cfg.screen.fill(cfg.black)
                 cfg.screen.blit(cfg.LOGO, ((screenwidth - cfg.LOGO.get_width()) / 2, screenheight / 2 - cfg.LOGO.get_height()))
@@ -98,14 +99,12 @@ def start_game() -> int:
         transfer_map_pos -= cfg.SCROLL_SPEED
         #endregion MapScrolling
 
-
         #region Draw
         cfg.screen.fill(cfg.grey)
 
         cfg.screen.blit(cfg.MAP_TILES[map_tile], (0, screenheight - map_pos))
         cfg.screen.blit(cfg.MAP_TILES[transfer_map_tile], (0, screenheight - transfer_map_pos))
 
-        # pygame.draw.rect(cfg.screen, red, cfg.player.rect, 1)
         cfg.live_sprites.draw(cfg.screen)
 
         cfg.screen.blit(score_text, ((screenwidth - score_text.get_width()) / 2, 5 * SCREEN_SCALE))

@@ -110,9 +110,7 @@ class Enemy(Character):
         self._dead = False
         self._fire_ticks = time_to_fire
 
-        # self._prop_ticks = 0
-
-    def update(self, keys):
+    def update(self, _keys):
         if self._motion_ticks >= self._motion[self._motion_index][2]:
             self._motion_ticks = 0
             self._motion_index += 1
@@ -129,7 +127,6 @@ class Enemy(Character):
         self._dead = False
 
         if not self._fire_ticks:
-            # Fire a bullet towards the player's current position
             dx = cfg.player.rect.x - self.rect.x
             dy = self.rect.y - cfg.player.rect.y
             mag = (dx ** 2 + dy ** 2) ** .5

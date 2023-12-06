@@ -22,7 +22,7 @@ class Explosion(pygame.sprite.Sprite):
         self._frame = 0
         self._ticks = 0
 
-    def update(self, keys):
+    def update(self, _keys):
         self._ticks += 1
         if not self._ticks % 5:
             self._frame += 1

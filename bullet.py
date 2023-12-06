@@ -16,7 +16,7 @@ class Bullet(pygame.sprite.Sprite):
         self._dx = dx
         self._dy = dy
 
-    def update(self, keys):
+    def update(self, _keys):
         self.rect.y -= self._SPEED * self._dy
         self.rect.x += self._SPEED * self._dx
         if self.rect.y < -self.rect.height:
