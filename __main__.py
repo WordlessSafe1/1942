@@ -76,6 +76,8 @@ def start_game() -> int:
         if map_pos <= 0:
             if next_map_tile >= len(level.GAME_MAP):
                 ticks = 0
+                cfg.BGM.stop()
+                cfg.WIN_MUSIC.play()
                 cfg.screen.fill(cfg.black)
                 cfg.screen.blit(cfg.LOGO, ((screenwidth - cfg.LOGO.get_width()) / 2, screenheight / 2 - cfg.LOGO.get_height()))
                 win_msg = cfg.LARGE_FONT.render("YOU WIN", True, cfg.white)

@@ -33,6 +33,7 @@ friendly_fire:      pygame.sprite.Group = None
 
 BGM:                pygame.mixer.Sound = None
 GAME_OVER_MUSIC:    pygame.mixer.Sound = None
+WIN_MUSIC:          pygame.mixer.Sound = None
 EXPLOSION_SOUND:    pygame.mixer.Sound = None
 FIZZLE_SOUND:       pygame.mixer.Sound = None
 
@@ -80,9 +81,10 @@ def init():
     hostile_sprites = pygame.sprite.Group()
     friendly_fire = pygame.sprite.Group()
 
-    global BGM, GAME_OVER_MUSIC, EXPLOSION_SOUND, FIZZLE_SOUND
+    global BGM, GAME_OVER_MUSIC, WIN_MUSIC, EXPLOSION_SOUND, FIZZLE_SOUND
     BGM = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
     GAME_OVER_MUSIC = pygame.mixer.Sound("resources/sfx/GameOver.wav")
+    WIN_MUSIC = pygame.mixer.Sound("resources/sfx/RankTheme1.wav")
     EXPLOSION_SOUND = pygame.mixer.Sound("resources/sfx/Explosion.wav")
     FIZZLE_SOUND = pygame.mixer.Sound("resources/sfx/Fizzle.wav")
 
