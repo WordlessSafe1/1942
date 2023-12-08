@@ -68,7 +68,7 @@ control_scheme = "wasd"
 
 def init():
     global screen, clock, TINY_FONT, SMALL_FONT, MEDIUM_FONT, LARGE_FONT
-    screen = pygame.display.set_mode([screenwidth, screenheight], pygame.SCALED, vsync=1)
+    screen = pygame.display.set_mode([screenwidth, screenheight], pygame.SCALED | pygame.RESIZABLE, vsync=1)
     clock = pygame.time.Clock()
     TINY_FONT = pygame.font.Font("resources/fnt/1942.ttf", int(3.5 * SCREEN_SCALE))
     SMALL_FONT = pygame.font.Font("resources/fnt/1942.ttf", 5 * SCREEN_SCALE)

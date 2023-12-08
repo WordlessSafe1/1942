@@ -235,6 +235,29 @@ def init():
         ( 20, Enemy, (screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
         ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
 
+        (200, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+        ( 20, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+        ( 25, Enemy, (screenwidth - 3.5*ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+        ( 20, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],       0, -25, 160)),
+        ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0, 400)),
+        ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0)),
+        ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0,  95)),
+        ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0)),
+        ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0)),
+
+        
+        (250, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 80)),
+        (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0, 17)),
+        ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0)),
+        (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0, 41)),
+        ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0)),
+        (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0, 33)),
+        ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 160)),
+        (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0)),
+        ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 95)),
+        (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0)),
+
+
 
 
         (None, None, -1), # Wait infinitely until the game ends
