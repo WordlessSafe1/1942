@@ -146,10 +146,9 @@ def start_game() -> int:
                 cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
             elif game_over == cfg.DEATH_SCREEN_TICKS // 8:
                 cfg.GAME_OVER_MUSIC.play()
-        if life_lost:
+        elif life_lost:
             life_lost += 1
             if life_lost > cfg.DEATH_SCREEN_TICKS / 2:
-                locked_lives -= 1
                 cleanup()
                 wave       = stored_index
                 wave_ticks = stored_wavet
@@ -165,6 +164,8 @@ def start_game() -> int:
                 (cfg.LAST_LIFE_SOUND if cfg.lives == 1 else cfg.LOST_LIFE_SOUND).play()
                 cfg.bgm_timer = threading.Timer(5.5, cfg.BGM.play)
                 cfg.bgm_timer.start()
+        else:
+            locked_lives = cfg.lives
         #endregion death
 
 

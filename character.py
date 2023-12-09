@@ -32,6 +32,7 @@ class Player(Character):
         self._lean = 0
         self._prop_ticks = 0
         self._fire_cooldown = 0
+        self.fire_power = 0
 
     def update(self, keys):
         collisions = pygame.sprite.spritecollide(self, cfg.hostile_sprites, False)
@@ -55,7 +56,8 @@ class Player(Character):
         if keys[cfg.CONTROLS[cfg.control_scheme][2]] and self.rect.y + self.rect.height < screenheight:
             self.rect.y += self._V_SPEED
         if keys[cfg.CONTROLS[cfg.control_scheme][4]] and (not self._fire_cooldown) and len(cfg.friendly_fire) < self._MAX_SHOTS:
-            bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y - 5 * SCREEN_SCALE, "player", 0, 1)
+            bullet_type = "player" if not self.fire_power else "power"
+            bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y - 5 * SCREEN_SCALE, bullet_type, 0, 1)
             bullet.rect.x -= bullet.rect.width / 2
             cfg.live_sprites.add(bullet)
             cfg.friendly_fire.add(bullet)

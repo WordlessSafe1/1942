@@ -53,6 +53,17 @@ EXPLOSION_IMAGES        = None
 PLAYER_EXPLOSION_IMAGES = None
 BIG_EXPLOSION_IMAGES   = None
 
+POW_IMAGES = None
+POW_TTL = 300
+
+POW_RED    = 0 # 1000 pts
+POW_BLACK  = 1 # Xtra Life
+POW_YELLOW = 2 # Xtra Stage Loops
+POW_GREY   = 3 # Side Fighters
+POW_GREEN  = 4 # Main Weapon Upgrade
+POW_WHITE  = 5 # Kill All Enemies
+POW_ORANGE = 6 # Stop Enemy Shooting
+
 MAP_TILES:      list[pygame.Surface]        = None
 ENEMY_SPRITES:  list[list[pygame.Surface]]  = None
 BOSS_SPRITES:   list[list[pygame.Surface]]  = None
@@ -109,6 +120,7 @@ def init():
     bullet_sprites =  {
         "enemy":  SPRITESHEET.subsurface(pygame.Rect( 74,  89,   6,   6)),
         "player": SPRITESHEET.subsurface(pygame.Rect(101,  82,  15,  14)),
+        "power":  SPRITESHEET.subsurface(pygame.Rect(138,  82,  21,  14))
     }
     for k in bullet_sprites.keys():
         bullet_sprites[k] = pygame.transform.scale(bullet_sprites[k], (bullet_sprites[k].get_width() * SCREEN_SCALE, bullet_sprites[k].get_height() * SCREEN_SCALE))
@@ -130,6 +142,11 @@ def init():
     BIG_EXPLOSION_IMAGES = BIG_EXPLOSION_SPRITESHEET.load_strip(0, 6)
     for i in range(len(BIG_EXPLOSION_IMAGES)):
         BIG_EXPLOSION_IMAGES[i] = pygame.transform.scale(BIG_EXPLOSION_IMAGES[i], (BIG_EXPLOSION_IMAGES[i].get_width() * SCREEN_SCALE, BIG_EXPLOSION_IMAGES[i].get_height() * SCREEN_SCALE))
+
+    global POW_IMAGES
+    POW_IMAGES = SpriteSheet("resources/img/Pow.png", 7, 1).load_strip(0, 7)
+    for i in range(len(POW_IMAGES)):
+        POW_IMAGES[i] = pygame.transform.scale(POW_IMAGES[i], (POW_IMAGES[i].get_width() * SCREEN_SCALE, POW_IMAGES[i].get_height() * SCREEN_SCALE))
 
     global MAP_TILES
     ocean_raw = MAP_SPRITESHEET.subsurface(pygame.Rect(0, 0, 225, 175))

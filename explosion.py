@@ -1,5 +1,7 @@
 import pygame
 import config as cfg
+from power_up import PowerUp
+from random import choices, randint
 
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, x:int|float, y:int|float, type:int):
@@ -28,6 +30,7 @@ class Explosion(pygame.sprite.Sprite):
         self.rect.y = y
         self._frame = 0
         self._ticks = 0
+        self._type = type
 
     def update(self, _keys):
         self._ticks += 1
@@ -35,5 +38,14 @@ class Explosion(pygame.sprite.Sprite):
             self._frame += 1
             if self._frame >= len(self._images):
                 self.kill()
+                POWS = [cfg.POW_RED, cfg.POW_GREEN, cfg.POW_BLACK]
+                if self._type and randint(0, 20 // (self._type ** 3)):
+                    return
+                match(self._type):
+                    case 1: pow_type = choices(POWS, [100, 50, 20])[0]
+                    case 2: pow_type = choices(POWS, [  1, 30, 50])[0]
+                    case _: return
+                pow = PowerUp(pow_type, self.rect.x, self.rect.y)
+                cfg.live_sprites.add(pow)
                 return
             self.image = self._images[self._frame]
