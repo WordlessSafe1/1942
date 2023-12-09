@@ -2,19 +2,23 @@ import pygame
 import config as cfg
 
 class Explosion(pygame.sprite.Sprite):
-    def __init__(self, x:int|float, y:int|float, type:int = 0):
+    def __init__(self, x:int|float, y:int|float, type:int):
         """
         Initialize an Explosion
-        @param type - 0: Enemy, 1: Player
+        @param type - 0: Player, 1: Enemy, 2: Boss
         """
         pygame.sprite.Sprite.__init__(self)
-        if type == 0:
-            cfg.FIZZLE_SOUND.play()
-            self._images = cfg.EXPLOSION_IMAGES
-        else:
-            cfg.BGM.stop()
-            cfg.EXPLOSION_SOUND.play()
-            self._images = cfg.PLAYER_EXPLOSION_IMAGES
+        match(type):
+            case 0:
+                cfg.BGM.stop()
+                cfg.EXPLOSION_SOUND.play()
+                self._images = cfg.PLAYER_EXPLOSION_IMAGES
+            case 1:
+                cfg.FIZZLE_SOUND.play()
+                self._images = cfg.EXPLOSION_IMAGES
+            case 2:
+                cfg.EXPLOSION_SOUND.play()
+                self._images = cfg.BIG_EXPLOSION_IMAGES
         self.image = self._images[0]
         self.rect = self.image.get_rect()
         self.rect.x = x

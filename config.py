@@ -48,11 +48,14 @@ MAP_SPRITESHEET     = None
 
 EXPLOSION_IMAGES        = None
 PLAYER_EXPLOSION_IMAGES = None
+BIG_EXPLOSION_IMAGES   = None
 
 MAP_TILES:      list[pygame.Surface]        = None
 ENEMY_SPRITES:  list[list[pygame.Surface]]  = None
+BOSS_SPRITES:   list[list[pygame.Surface]]  = None
 
 ENEMY_SIZE = (15 * SCREEN_SCALE, 16 * SCREEN_SCALE)
+BOSS_SIZE  = (63 * SCREEN_SCALE, 48 * SCREEN_SCALE)
 
 player = None
 score: int = 0
@@ -105,7 +108,7 @@ def init():
     PLAYER_SPRITESHEET = SpriteSheet("resources/img/Sprites.png", 8, 2, pygame.Rect(2, 0, 255, 50))
     MAP_SPRITESHEET = pygame.image.load("resources/img/MapTiles.png").convert()
 
-    global EXPLOSION_IMAGES, PLAYER_EXPLOSION_IMAGES
+    global EXPLOSION_IMAGES, PLAYER_EXPLOSION_IMAGES, BIG_EXPLOSION_IMAGES
     EXPLOSION_SPRITESHEET = SpriteSheet("resources/img/Explosion.png", 6, 1)
     EXPLOSION_IMAGES = EXPLOSION_SPRITESHEET.load_strip(0, 6)
     for i in range(len(EXPLOSION_IMAGES)):
@@ -114,6 +117,10 @@ def init():
     PLAYER_EXPLOSION_IMAGES = PLAYER_EXPLOSION_SPRITESHEET.load_strip(0, 6)
     for i in range(len(PLAYER_EXPLOSION_IMAGES)):
         PLAYER_EXPLOSION_IMAGES[i] = pygame.transform.scale(PLAYER_EXPLOSION_IMAGES[i], (PLAYER_EXPLOSION_IMAGES[i].get_width() * SCREEN_SCALE, PLAYER_EXPLOSION_IMAGES[i].get_height() * SCREEN_SCALE))
+    BIG_EXPLOSION_SPRITESHEET = SpriteSheet("resources/img/BigExplosion.png", 7, 1)
+    BIG_EXPLOSION_IMAGES = BIG_EXPLOSION_SPRITESHEET.load_strip(0, 6)
+    for i in range(len(BIG_EXPLOSION_IMAGES)):
+        BIG_EXPLOSION_IMAGES[i] = pygame.transform.scale(BIG_EXPLOSION_IMAGES[i], (BIG_EXPLOSION_IMAGES[i].get_width() * SCREEN_SCALE, BIG_EXPLOSION_IMAGES[i].get_height() * SCREEN_SCALE))
 
     global MAP_TILES
     ocean_raw = MAP_SPRITESHEET.subsurface(pygame.Rect(0, 0, 225, 175))
@@ -138,3 +145,10 @@ def init():
             sprite = ENEMY_SPRITES[y][x]
             ENEMY_SPRITES[y][x] = pygame.transform.scale(sprite, (sprite.get_width() * SCREEN_SCALE, sprite.get_height() * SCREEN_SCALE))
     ENEMY_SIZE = (15 * SCREEN_SCALE, 16 * SCREEN_SCALE)
+
+    global BOSS_SPRITES, BOSS_SIZE
+    BOSS_SPRITES = [SpriteSheet("resources/img/Boss.png", 9, 1).load_strip(0, 9)]
+    for x in range(len(BOSS_SPRITES[0])):
+        sprite = BOSS_SPRITES[0][x]
+        BOSS_SPRITES[0][x] = pygame.transform.scale(sprite, (sprite.get_width() * SCREEN_SCALE, sprite.get_height() * SCREEN_SCALE))
+    BOSS_SIZE = (63  * SCREEN_SCALE, 48  * SCREEN_SCALE)

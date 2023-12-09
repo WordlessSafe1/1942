@@ -1,6 +1,6 @@
 import pygame
-from config import screenwidth, screenheight, ENEMY_SIZE
-from character import Enemy
+from config import screenwidth, screenheight, ENEMY_SIZE, BOSS_SIZE
+from character import Enemy, Boss
 
 GAME_MAP: list[int] = None
 ENEMY_PATHS: dict[str, list[tuple[int|float,int|float,int,int,int]]] = None
@@ -121,6 +121,18 @@ def init():
             ( 2.25, -0.75,   10, 12, 4),
             (    3,     0, 2000,  0, 3),
         ],
+        "boss": [
+            (   0,     -2,  300, 0, 0),
+            (  -1,     -1,   50, 0, 0),
+            (  -1,      0,   75, 0, 0),
+            (  -1,      1,   50, 0, 0),
+            (   0,      1,   75, 0, 0),
+            (   1,      1,   50, 0, 0),
+            (   1,      0,   75, 0, 0),
+            (   1,     -1,   50, 0, 0),
+            (   0,     -1,   25, 0, 0),
+            (   0,     -2, 2000, 0, 0),
+        ]
     }
     # [ (WaitTime, EnemyType, ConstructorArguments), ... ]
     ENEMY_WAVES = [
@@ -245,8 +257,9 @@ def init():
         ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0)),
         ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0)),
 
-        
-        (250, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 80)),
+        (125, Boss,    (screenwidth / 2,                   screenheight, ENEMY_PATHS["boss"],                   0,  0)),
+
+        (125, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 80)),
         (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0, 17)),
         ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0)),
         (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0, 41)),
@@ -256,7 +269,6 @@ def init():
         (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0)),
         ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 95)),
         (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0)),
-
 
 
 

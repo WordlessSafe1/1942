@@ -2,12 +2,13 @@ import pygame
 from pygame.locals import *
 import level
 import config as cfg
-from character import Player
+from character import Player, init as character_init
 
 
 pygame.init()
 cfg.init()
 level.init()
+character_init()
 
 SCREEN_SCALE, ENEMY_SIZE, screenheight, screenwidth = cfg.SCREEN_SCALE, cfg.ENEMY_SIZE, cfg.screenheight, cfg.screenwidth
 
