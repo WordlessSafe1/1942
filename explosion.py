@@ -10,7 +10,10 @@ class Explosion(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         match(type):
             case 0:
-                cfg.BGM.stop()
+                if cfg.bgm_timer != None:
+                    cfg.bgm_timer.cancel()
+                    cfg.bgm_timer = None
+                pygame.mixer.stop()
                 cfg.EXPLOSION_SOUND.play()
                 self._images = cfg.PLAYER_EXPLOSION_IMAGES
             case 1:

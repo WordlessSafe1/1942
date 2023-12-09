@@ -84,7 +84,7 @@ class Player(Character):
                     self.image.set_at((x, y), prop_up)
 
     def hit(self):
-        pygame.event.post(pygame.event.Event(cfg.GAME_OVER, {"win": False}))
+        pygame.event.post(pygame.event.Event(cfg.LIFE_LOST, {"win": False}))
         explosion = Explosion(self.rect.x, self.rect.y, 0)
         cfg.live_sprites.add(explosion)
         super().kill()

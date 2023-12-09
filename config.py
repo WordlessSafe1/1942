@@ -1,8 +1,9 @@
+import threading
 import pygame
 from pygame.locals import *
 from spritesheet import SpriteSheet
 
-GAME_OVER  = pygame.USEREVENT + 0
+LIFE_LOST  = pygame.USEREVENT + 0
 
 DEATH_SCREEN_TICKS = 500
 
@@ -36,6 +37,8 @@ GAME_OVER_MUSIC:    pygame.mixer.Sound = None
 WIN_MUSIC:          pygame.mixer.Sound = None
 EXPLOSION_SOUND:    pygame.mixer.Sound = None
 FIZZLE_SOUND:       pygame.mixer.Sound = None
+LOST_LIFE_SOUND:    pygame.mixer.Sound = None
+LAST_LIFE_SOUND:    pygame.mixer.Sound = None
 
 SPRITESHEET = None
 LOGO        = None
@@ -57,8 +60,12 @@ BOSS_SPRITES:   list[list[pygame.Surface]]  = None
 ENEMY_SIZE = (15 * SCREEN_SCALE, 16 * SCREEN_SCALE)
 BOSS_SIZE  = (63 * SCREEN_SCALE, 48 * SCREEN_SCALE)
 
+STARTING_LIVES = 3
+
 player = None
 score: int = 0
+lives = STARTING_LIVES
+bgm_timer: threading.Timer|None = None
 
 CONTROLS = {
     "arrows":   [K_UP, K_LEFT, K_DOWN, K_RIGHT, K_SPACE],
@@ -72,24 +79,26 @@ control_scheme = "wasd"
 def init():
     global screen, clock, TINY_FONT, SMALL_FONT, MEDIUM_FONT, LARGE_FONT
     screen = pygame.display.set_mode([screenwidth, screenheight], pygame.SCALED | pygame.RESIZABLE, vsync=1)
-    clock = pygame.time.Clock()
-    TINY_FONT = pygame.font.Font("resources/fnt/1942.ttf", int(3.5 * SCREEN_SCALE))
-    SMALL_FONT = pygame.font.Font("resources/fnt/1942.ttf", 5 * SCREEN_SCALE)
+    clock  = pygame.time.Clock()
+    TINY_FONT   = pygame.font.Font("resources/fnt/1942.ttf", int(3.5 * SCREEN_SCALE))
+    SMALL_FONT  = pygame.font.Font("resources/fnt/1942.ttf", 5 * SCREEN_SCALE)
     MEDIUM_FONT = pygame.font.Font("resources/fnt/1942.ttf", 10 * SCREEN_SCALE)
-    LARGE_FONT = pygame.font.Font("resources/fnt/1942.ttf", int(17.5 * SCREEN_SCALE))
+    LARGE_FONT  = pygame.font.Font("resources/fnt/1942.ttf", int(17.5 * SCREEN_SCALE))
 
     global live_sprites, friendly_sprites, hostile_sprites, friendly_fire
-    live_sprites = pygame.sprite.Group()
+    live_sprites     = pygame.sprite.Group()
     friendly_sprites = pygame.sprite.Group()
-    hostile_sprites = pygame.sprite.Group()
-    friendly_fire = pygame.sprite.Group()
+    hostile_sprites  = pygame.sprite.Group()
+    friendly_fire    = pygame.sprite.Group()
 
-    global BGM, GAME_OVER_MUSIC, WIN_MUSIC, EXPLOSION_SOUND, FIZZLE_SOUND
-    BGM = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
+    global BGM, GAME_OVER_MUSIC, WIN_MUSIC, EXPLOSION_SOUND, FIZZLE_SOUND, LOST_LIFE_SOUND, LAST_LIFE_SOUND
+    BGM             = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
     GAME_OVER_MUSIC = pygame.mixer.Sound("resources/sfx/GameOver.wav")
-    WIN_MUSIC = pygame.mixer.Sound("resources/sfx/RankTheme1.wav")
+    WIN_MUSIC       = pygame.mixer.Sound("resources/sfx/RankTheme1.wav")
     EXPLOSION_SOUND = pygame.mixer.Sound("resources/sfx/Explosion.wav")
-    FIZZLE_SOUND = pygame.mixer.Sound("resources/sfx/Fizzle.wav")
+    FIZZLE_SOUND    = pygame.mixer.Sound("resources/sfx/Fizzle.wav")
+    LOST_LIFE_SOUND = pygame.mixer.Sound("resources/sfx/StageRestart1.wav")
+    LAST_LIFE_SOUND = pygame.mixer.Sound("resources/sfx/StageRestart2.wav")
 
     global SPRITESHEET, LOGO
     SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert()

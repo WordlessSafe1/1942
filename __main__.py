@@ -1,8 +1,10 @@
+import time
 import pygame
 from pygame.locals import *
 import level
 import config as cfg
 from character import Player, init as character_init
+import threading
 
 
 pygame.init()
@@ -20,7 +22,6 @@ def start_game() -> int:
     """
     #region Setup
     cfg.BGM.play(loops=-1)
-    pygame.display.set_caption("1942")
     running = True
     cfg.player = Player()
     cfg.friendly_sprites.add(cfg.player)
@@ -34,7 +35,9 @@ def start_game() -> int:
     wave = 0
     paused = False
     game_over = 0
+    life_lost = 0
     score_text = cfg.SMALL_FONT.render("Score", True, cfg.red)
+    locked_lives = cfg.lives
     #endregion Setup
     while running:
         #region Events
@@ -42,8 +45,19 @@ def start_game() -> int:
             if event.type == QUIT:
                 running = False
                 break
-            elif event.type == cfg.GAME_OVER:
-                game_over = 1
+            elif event.type == cfg.LIFE_LOST:
+                stored_wavet  = wave_ticks
+                stored_index  = wave
+                stored_scroll = map_pos
+                stored_tile   = map_tile
+                stored_nmap   = next_map_tile
+                stored_tmap   = transfer_map_tile
+                stored_tmap_pos = transfer_map_pos
+                cfg.lives -= 1
+                if cfg.lives:
+                    life_lost = 1
+                else:
+                    game_over = 1
             elif event.type == KEYDOWN and (not game_over) and event.key == K_ESCAPE:
                 if paused:
                     pygame.mixer.unpause()
@@ -77,6 +91,9 @@ def start_game() -> int:
         if map_pos <= 0:
             if next_map_tile >= len(level.GAME_MAP):
                 ticks = 0
+                if cfg.bgm_timer != None:
+                    cfg.bgm_timer.cancel()
+                    cfg.bgm_timer = None
                 cfg.BGM.stop()
                 cfg.WIN_MUSIC.play()
                 cfg.screen.fill(cfg.black)
@@ -114,6 +131,10 @@ def start_game() -> int:
         text = cfg.SMALL_FONT.render(str(cfg.score), True, cfg.white)
         cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, score_text.get_height() + 7 * SCREEN_SCALE))
 
+        for i in range(locked_lives - 1):
+            cfg.screen.blit(cfg.ENEMY_SPRITES[0][0], (5 + i * (5 + cfg.ENEMY_SIZE[0]), cfg.screenheight - cfg.ENEMY_SIZE[1] - 5))
+
+        #region death
         if game_over:
             game_over += 1
             if game_over > cfg.DEATH_SCREEN_TICKS:
@@ -123,6 +144,26 @@ def start_game() -> int:
                 cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
             elif game_over == cfg.DEATH_SCREEN_TICKS // 8:
                 cfg.GAME_OVER_MUSIC.play()
+        if life_lost:
+            life_lost += 1
+            if life_lost > cfg.DEATH_SCREEN_TICKS / 2:
+                locked_lives -= 1
+                cleanup()
+                wave       = stored_index
+                wave_ticks = stored_wavet
+                map_pos    = stored_scroll
+                map_tile   = stored_tile
+                next_map_tile = stored_nmap
+                transfer_map_pos = stored_tmap_pos
+                transfer_map_tile = stored_tmap
+                cfg.player = Player()
+                cfg.friendly_sprites.add(cfg.player)
+                cfg.live_sprites.add(cfg.player)
+                life_lost  = 0
+                (cfg.LAST_LIFE_SOUND if cfg.lives == 1 else cfg.LOST_LIFE_SOUND).play()
+                cfg.bgm_timer = threading.Timer(5.5, cfg.BGM.play)
+                cfg.bgm_timer.start()
+        #endregion death
 
 
         pygame.display.flip()
@@ -136,7 +177,6 @@ def cleanup() -> None:
         sprite.kill()
     cfg.screen.fill(cfg.black)
     pygame.display.flip()
-    cfg.score = 0
 
 def main_menu() -> bool:
     pygame.display.set_caption("1942")
@@ -172,6 +212,8 @@ def main() -> None:
         return
     while not start_game():
         cleanup()
+        cfg.score = 0
+        cfg.lives = cfg.STARTING_LIVES
         if not main_menu(): 
             break
     pygame.quit()
