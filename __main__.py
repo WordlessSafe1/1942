@@ -5,12 +5,14 @@ import level
 import config as cfg
 from character import Player, init as character_init
 import threading
+from random import seed
 
 
 pygame.init()
 cfg.init()
 level.init()
 character_init()
+seed(1942)
 
 SCREEN_SCALE, ENEMY_SIZE, screenheight, screenwidth = cfg.SCREEN_SCALE, cfg.ENEMY_SIZE, cfg.screenheight, cfg.screenwidth
 
@@ -212,6 +214,7 @@ def main() -> None:
         return
     while not start_game():
         cleanup()
+        seed(1942)
         cfg.score = 0
         cfg.lives = cfg.STARTING_LIVES
         if not main_menu(): 

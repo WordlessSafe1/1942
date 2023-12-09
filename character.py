@@ -5,6 +5,7 @@ from pygame.locals import *
 from config import SCREEN_SCALE, screenwidth, screenheight
 from bullet import Bullet
 from explosion import Explosion
+from random import randint
 
 class Character(pygame.sprite.Sprite, ABC):
     @abstractmethod
@@ -170,6 +171,18 @@ class Boss(Enemy):
         self._health = 20
         self._death_ticks = -1
         self._frame = 0
+        self._next_shot = 300
+
+    def update(self, _keys):
+        super().update(_keys)
+        if not self._fire_ticks % self._next_shot:
+            self._next_shot = randint(60, 300)
+            for dx,dy in [(1,1), (1,-1), (-.25, -1)]:
+                bullet = Bullet(self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height, "enemy", dx, dy)
+                bullet.rect.x -= bullet.rect.width / 2
+                cfg.live_sprites.add(bullet)
+
+
 
     def update_propellers(self):
         prop_up   = (192, 192, 144)
