@@ -1,6 +1,7 @@
 ### Project-Specific ###
 old/
 utils/
+data/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

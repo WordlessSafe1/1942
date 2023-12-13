@@ -12,6 +12,7 @@ white = (255, 255, 255)
 black = (  0,   0,   0)
 red   = (255,   0,   0)
 green = (  0, 255,   0)
+blue  = (  0,   0, 255)
 grey  = ( 31,  31,  31)
 
 SCREEN_SCALE = 2
@@ -52,7 +53,8 @@ MAP_SPRITESHEET     = None
 
 EXPLOSION_IMAGES        = None
 PLAYER_EXPLOSION_IMAGES = None
-BIG_EXPLOSION_IMAGES   = None
+BIG_EXPLOSION_IMAGES    = None
+CURSOR_IMAGE            = None
 
 POW_IMAGES = None
 POW_TTL = 300
@@ -143,6 +145,9 @@ def init():
     BIG_EXPLOSION_IMAGES = BIG_EXPLOSION_SPRITESHEET.load_strip(0, 6)
     for i in range(len(BIG_EXPLOSION_IMAGES)):
         BIG_EXPLOSION_IMAGES[i] = pygame.transform.scale(BIG_EXPLOSION_IMAGES[i], (BIG_EXPLOSION_IMAGES[i].get_width() * SCREEN_SCALE, BIG_EXPLOSION_IMAGES[i].get_height() * SCREEN_SCALE))
+
+    global CURSOR_IMAGE
+    CURSOR_IMAGE = SPRITESHEET.subsurface(pygame.Rect(128, 135, 16, 16))
 
     global POW_IMAGES
     POW_IMAGES = SpriteSheet("resources/img/Pow.png", 7, 1).load_strip(0, 7)

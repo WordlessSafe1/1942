@@ -5,6 +5,7 @@ import config as cfg
 from character import Player, init as character_init
 import threading
 from random import seed
+import leaderboard
 
 
 pygame.init()
@@ -108,7 +109,8 @@ def start_game() -> int:
                 cfg.screen.blit(cfg.LOGO, ((screenwidth - cfg.LOGO.get_width()) / 2, screenheight / 2 - cfg.LOGO.get_height()))
                 win_msg = cfg.LARGE_FONT.render("YOU WIN", True, cfg.white)
                 cfg.screen.blit(win_msg, ((screenwidth - win_msg.get_width()) / 2, (screenheight + win_msg.get_height()) / 2))
-                text = cfg.SMALL_FONT.render(f"Score: {cfg.score}", True, cfg.white)
+                text = cfg.SMALL_FONT.render(f"Score: {cfg.score} + 10,0000", True, cfg.white)
+                cfg.score += 10000
                 cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight + text.get_height()) / 2 + win_msg.get_height() + 2 * text.get_height()))
                 pygame.display.flip()
                 while ticks < 500:
@@ -199,7 +201,12 @@ def cleanup() -> None:
 def main_menu() -> bool:
     pygame.display.set_caption("1942")
     running = True
+    ticks = 0
     while running:
+        ticks += 1
+        if not ticks % 600:
+            if leaderboard.show(600):
+                return True
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 return False
@@ -229,6 +236,8 @@ def main() -> None:
     if not main_menu():
         return
     while not start_game():
+        leaderboard.new_entry()
+        leaderboard.show(300)
         cleanup()
         seed(1942)
         cfg.score = 0
