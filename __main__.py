@@ -1,4 +1,3 @@
-import time
 import pygame
 from pygame.locals import *
 import level
@@ -40,6 +39,8 @@ def start_game() -> int:
     life_lost = 0
     score_text = cfg.SMALL_FONT.render("Score", True, cfg.red)
     locked_lives = cfg.lives
+    stage = 0
+    stage_cooldown = 0
     #endregion Setup
     while running:
         #region Events
@@ -79,8 +80,11 @@ def start_game() -> int:
         cfg.live_sprites.update(keys)
 
         #region SpawnEnemies
-        while wave_ticks == level.ENEMY_WAVES[wave][0]:
-            _, type, args = level.ENEMY_WAVES[wave]
+        while wave_ticks == level.ENEMY_WAVES[stage][wave][0]:
+            _, type, args = level.ENEMY_WAVES[stage][wave]
+            if type == None:
+                wave += 1
+                continue
             enemy = type(*args)
             cfg.hostile_sprites.add(enemy)
             cfg.live_sprites.add(enemy)
@@ -90,8 +94,10 @@ def start_game() -> int:
         #endregion SpawnEnemies
 
         #region MapScrolling
+        if map_tile == 0 and wave >= len(level.ENEMY_WAVES[stage]) - 1 and wave_ticks >= cfg.STAGE_TRANSITION_TIME:
+            stage_cooldown = cfg.STAGE_TRANSITION_TIME
         if map_pos <= 0:
-            if next_map_tile >= len(level.GAME_MAP):
+            if next_map_tile >= len(level.GAME_MAP) or stage >= len(level.ENEMY_WAVES):
                 ticks = 0
                 if cfg.bgm_timer != None:
                     cfg.bgm_timer.cancel()
@@ -113,6 +119,7 @@ def start_game() -> int:
                     cfg.clock.tick(60)
                     ticks += 1
                 return 0
+            
             map_tile, transfer_map_tile = transfer_map_tile, level.GAME_MAP[next_map_tile]
             next_map_tile += 1
             map_pos = transfer_map_pos
@@ -168,6 +175,14 @@ def start_game() -> int:
             locked_lives = cfg.lives
         #endregion death
 
+        if stage_cooldown == 1:
+            stage += 1
+            wave_ticks = -stage_cooldown
+            wave = 0
+        if stage_cooldown > 0:
+            stage_cooldown -= 1
+            text = cfg.MEDIUM_FONT.render(f"Stage {stage + 1} complete", True, cfg.white)
+            cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
 
         pygame.display.flip()
         #endregion Draw

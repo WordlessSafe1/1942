@@ -6,6 +6,7 @@ from spritesheet import SpriteSheet
 LIFE_LOST  = pygame.USEREVENT + 0
 
 DEATH_SCREEN_TICKS = 500
+STAGE_TRANSITION_TIME = 300
 
 white = (255, 255, 255)
 black = (  0,   0,   0)
@@ -112,7 +113,7 @@ def init():
     LAST_LIFE_SOUND = pygame.mixer.Sound("resources/sfx/StageRestart2.wav")
 
     global SPRITESHEET, LOGO
-    SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert()
+    SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert_alpha()
     LOGO = SPRITESHEET.subsurface(pygame.Rect(68, 704, 184, 49))
     LOGO = pygame.transform.scale(LOGO, (LOGO.get_width() * (SCREEN_SCALE / 1.5), LOGO.get_height() * (SCREEN_SCALE / 1.5)))
 
