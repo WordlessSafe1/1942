@@ -25,6 +25,7 @@ class Player(Character):
         self._images = cfg.PLAYER_SPRITESHEET.load_strip(0, 7)
         self.image = self._images[0]
         self.image = pygame.transform.scale(self.image, (self.image.get_width() * SCREEN_SCALE, self.image.get_height() * SCREEN_SCALE))
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = pygame.Rect((screenwidth - 62) / 2, screenheight - 150, 62, 50)
         self._anim = 0
         self._frame = 0
@@ -35,10 +36,12 @@ class Player(Character):
         self.fire_power = 0
 
     def update(self, keys):
-        collisions = pygame.sprite.spritecollide(self, cfg.hostile_sprites, False)
+        collisions = False
+        for sprite in cfg.hostile_sprites:
+            if pygame.sprite.collide_mask(self, sprite):
+                sprite.hit()
+                collisions = True
         if collisions:
-            for collision in collisions:
-                collision.hit()
             self.hit()
             return
 
@@ -70,6 +73,7 @@ class Player(Character):
         if lean:
             self.image = self._tilt_frames[lean + 3]
             self.image = pygame.transform.scale(self.image, (self.image.get_width() * SCREEN_SCALE, self.image.get_height() * SCREEN_SCALE))
+            self.mask = pygame.mask.from_surface(self.image)
 
         self._prop_ticks += 1
         if not self._prop_ticks % 10:
@@ -107,6 +111,7 @@ class Enemy(Character):
         self._motion_ticks = skip_ticks
         self._dx, self._dy, _, frame_x, frame_y = self._motion[self._motion_index]
         self.image = cfg.ENEMY_SPRITES[frame_x][frame_y]
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -125,6 +130,7 @@ class Enemy(Character):
                 return
             self._dx, self._dy, _, frame_x, frame_y = self._motion[self._motion_index]
             self.image = self._SPRITES[frame_x][frame_y]
+            self.mask = pygame.mask.from_surface(self.image)
         self.x += self._dx
         self.y += self._dy
         self.rect.x = self.x
@@ -167,6 +173,7 @@ class Boss(Enemy):
         super().__init__(x=x, y=y, motion=motion, skip_frames=skip_frames, skip_ticks=skip_ticks, time_to_fire=time_to_fire)
         frame_x = self._motion[self._motion_index][3]
         self.image = cfg.BOSS_SPRITES[0][frame_x]
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y

@@ -9,6 +9,7 @@ class Bullet(pygame.sprite.Sprite):
         if style not in config.bullet_sprites.keys():
             raise ValueError(f"Invalid bullet style: {style}")
         self.image = config.bullet_sprites[style]
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -23,7 +24,8 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
             return
         targets = config.friendly_sprites if self._style == "enemy" else config.hostile_sprites
-        collisions = pygame.sprite.spritecollide(self, targets, False)
-        for collision in collisions:
-            collision.hit()
-            self.kill()
+        for target in targets:
+            if pygame.sprite.collide_mask(self, target):
+                target.hit()
+                self.kill()
+                return
