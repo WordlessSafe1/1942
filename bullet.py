@@ -27,5 +27,7 @@ class Bullet(pygame.sprite.Sprite):
         for target in targets:
             if pygame.sprite.collide_mask(self, target):
                 target.hit()
+                if self._style == "power":
+                    target.hit()
                 self.kill()
                 return

@@ -61,6 +61,8 @@ CURSOR_IMAGE            = None
 POW_IMAGES = None
 POW_TTL = 300
 
+POINT_IMAGE_1000 = None
+
 POW_RED    = 0 # 1000 pts
 POW_BLACK  = 1 # Xtra Life
 POW_YELLOW = 2 # Xtra Stage Loops
@@ -157,6 +159,10 @@ def init():
     POW_IMAGES = SpriteSheet("resources/img/Pow.png", 7, 1).load_strip(0, 7)
     for i in range(len(POW_IMAGES)):
         POW_IMAGES[i] = pygame.transform.scale(POW_IMAGES[i], (POW_IMAGES[i].get_width() * SCREEN_SCALE, POW_IMAGES[i].get_height() * SCREEN_SCALE))
+
+    global POINT_IMAGE_1000
+    POINT_IMAGE_1000 = SPRITESHEET.subsurface(237,116,22,16)
+    POINT_IMAGE_1000 = pygame.transform.scale(POINT_IMAGE_1000, (POINT_IMAGE_1000.get_width() * SCREEN_SCALE, POINT_IMAGE_1000.get_height() * SCREEN_SCALE))
 
     global MAP_TILES
     ocean_raw = MAP_SPRITESHEET.subsurface(pygame.Rect(0, 0, 225, 175))
