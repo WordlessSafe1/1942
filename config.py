@@ -41,6 +41,8 @@ EXPLOSION_SOUND:    pygame.mixer.Sound = None
 FIZZLE_SOUND:       pygame.mixer.Sound = None
 LOST_LIFE_SOUND:    pygame.mixer.Sound = None
 LAST_LIFE_SOUND:    pygame.mixer.Sound = None
+LDRBOARD_SOUND:     pygame.mixer.Sound = None
+TOP_LDRBOARD_SOUND: pygame.mixer.Sound = None
 
 SPRITESHEET = None
 LOGO        = None
@@ -105,14 +107,16 @@ def init():
     hostile_sprites  = pygame.sprite.Group()
     friendly_fire    = pygame.sprite.Group()
 
-    global BGM, GAME_OVER_MUSIC, WIN_MUSIC, EXPLOSION_SOUND, FIZZLE_SOUND, LOST_LIFE_SOUND, LAST_LIFE_SOUND
-    BGM             = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
-    GAME_OVER_MUSIC = pygame.mixer.Sound("resources/sfx/GameOver.wav")
-    WIN_MUSIC       = pygame.mixer.Sound("resources/sfx/RankTheme1.wav")
-    EXPLOSION_SOUND = pygame.mixer.Sound("resources/sfx/Explosion.wav")
-    FIZZLE_SOUND    = pygame.mixer.Sound("resources/sfx/Fizzle.wav")
-    LOST_LIFE_SOUND = pygame.mixer.Sound("resources/sfx/StageRestart1.wav")
-    LAST_LIFE_SOUND = pygame.mixer.Sound("resources/sfx/StageRestart2.wav")
+    global BGM, GAME_OVER_MUSIC, WIN_MUSIC, EXPLOSION_SOUND, FIZZLE_SOUND, LOST_LIFE_SOUND, LAST_LIFE_SOUND, LDRBOARD_SOUND, TOP_LDRBOARD_SOUND
+    BGM                 = pygame.mixer.Sound("resources/sfx/StageTheme.wav")
+    GAME_OVER_MUSIC     = pygame.mixer.Sound("resources/sfx/GameOver.wav")
+    WIN_MUSIC           = pygame.mixer.Sound("resources/sfx/RankTheme1.wav")
+    EXPLOSION_SOUND     = pygame.mixer.Sound("resources/sfx/Explosion.wav")
+    FIZZLE_SOUND        = pygame.mixer.Sound("resources/sfx/Fizzle.wav")
+    LOST_LIFE_SOUND     = pygame.mixer.Sound("resources/sfx/StageRestart1.wav")
+    LAST_LIFE_SOUND     = pygame.mixer.Sound("resources/sfx/StageRestart2.wav")
+    LDRBOARD_SOUND      = pygame.mixer.Sound("resources/sfx/RankTheme2.wav")
+    TOP_LDRBOARD_SOUND  = pygame.mixer.Sound("resources/sfx/Leaderboard.wav")
 
     global SPRITESHEET, LOGO
     SPRITESHEET = pygame.image.load("resources/img/Sprites.png").convert_alpha()

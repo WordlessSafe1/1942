@@ -40,6 +40,10 @@ def new_entry():
             break
     if place == -1:
         place = len(scores) + 1
+    if place <= 5:
+        cfg.TOP_LDRBOARD_SOUND.play(loops=-1)
+    else:
+        cfg.LDRBOARD_SOUND.play()
     place_txt = place_text(place)
 
     while running:
@@ -62,6 +66,7 @@ def new_entry():
             elif event.type == KEYDOWN and event.key == cfg.CONTROLS[cfg.control_scheme][4]: # Space
                 if char_selected == 49:
                     _save_score(name, cfg.score)
+                    cfg.TOP_LDRBOARD_SOUND.stop()
                     return
                 if char_selected == 48:
                     name = name[:-1]
@@ -69,7 +74,10 @@ def new_entry():
                 if len(name) >= 8:
                     continue
                 name += chars[char_selected]
-        
+            elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                cfg.TOP_LDRBOARD_SOUND.stop()
+                return
+
         cfg.screen.fill(cfg.black)
         for i in range(len(chars)):
             text = cfg.SMALL_FONT.render(chars[i], True, cfg.white)
@@ -97,6 +105,9 @@ def new_entry():
         else:
             text = cfg.SMALL_FONT.render(f"{place_text(place + 2)} {default_score[1]:>8} {default_score[0]:<8}", True, cfg.white)
         cfg.screen.blit(text, ((screenwidth - text.get_width()) // 2, (screenheight - text.get_height()) // 2 + 6 * text.get_height()))
+
+        text = cfg.SMALL_FONT.render("Press ESC to skip", True, cfg.white)
+        cfg.screen.blit(text, ((screenwidth - text.get_width())/2, screenheight - text.get_height() - 2 * SCREEN_SCALE))
 
 
         pygame.display.flip()
@@ -128,6 +139,10 @@ def show(time:int = -1) -> bool:
         x = (screenwidth - text.get_width()) // 2
         y = (screenheight - text.get_height()) // 3 + i * (text.get_height() + 5 * SCREEN_SCALE) + 10 * SCREEN_SCALE
         cfg.screen.blit(text, (x, y))
+
+    if time == -1:
+        text = cfg.SMALL_FONT.render("PRESS ENTER TO CONTINUE", True, cfg.white)
+        cfg.screen.blit(text, ((screenwidth - text.get_width()) // 2, screenheight - text.get_height() - 10 * SCREEN_SCALE))
 
     pygame.display.flip()
     #endregion draw

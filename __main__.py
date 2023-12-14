@@ -109,15 +109,21 @@ def start_game() -> int:
                 cfg.screen.blit(cfg.LOGO, ((screenwidth - cfg.LOGO.get_width()) / 2, screenheight / 2 - cfg.LOGO.get_height()))
                 win_msg = cfg.LARGE_FONT.render("YOU WIN", True, cfg.white)
                 cfg.screen.blit(win_msg, ((screenwidth - win_msg.get_width()) / 2, (screenheight + win_msg.get_height()) / 2))
-                text = cfg.SMALL_FONT.render(f"Score: {cfg.score} + 10,0000", True, cfg.white)
-                cfg.score += 10000
+                text = cfg.SMALL_FONT.render(f"Score: {cfg.score} + 100000", True, cfg.white)
                 cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight + text.get_height()) / 2 + win_msg.get_height() + 2 * text.get_height()))
+                cfg.score += 100000
+                for i in range(cfg.lives - 1):
+                    cfg.score += 10000
+                    text = cfg.SMALL_FONT.render(f"Bonus: +{10000}", True, cfg.white)
+                    x = (screenwidth - text.get_width()) / 2
+                    y = 5 * SCREEN_SCALE + (screenheight + text.get_height()) / 2 + win_msg.get_height() + 3 * text.get_height() + SCREEN_SCALE * i * text.get_height()
+                    cfg.screen.blit(text, (x, y))
+
                 pygame.display.flip()
                 while ticks < 500:
                     for event in pygame.event.get():
                         if event.type == QUIT:
-                            running = False
-                            break
+                            return -1
                     cfg.clock.tick(60)
                     ticks += 1
                 return 0
@@ -171,7 +177,7 @@ def start_game() -> int:
                 cfg.live_sprites.add(cfg.player)
                 life_lost  = 0
                 (cfg.LAST_LIFE_SOUND if cfg.lives == 1 else cfg.LOST_LIFE_SOUND).play()
-                cfg.bgm_timer = threading.Timer(5.5, cfg.BGM.play)
+                cfg.bgm_timer = threading.Timer(5.5, cfg.BGM.play, kwargs={"loops": -1})
                 cfg.bgm_timer.start()
         else:
             locked_lives = cfg.lives
@@ -181,7 +187,7 @@ def start_game() -> int:
             stage += 1
             wave_ticks = -stage_cooldown
             wave = 0
-        if stage_cooldown > 0:
+        if stage_cooldown > 0 and not (game_over or life_lost):
             stage_cooldown -= 1
             text = cfg.MEDIUM_FONT.render(f"Stage {stage + 1} complete", True, cfg.white)
             cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
@@ -212,6 +218,8 @@ def main_menu() -> bool:
                 return False
             elif event.type == KEYDOWN and event.key == K_RETURN:
                 return True
+            elif event.type == KEYDOWN and event.key == K_l:
+                leaderboard.show()
             elif event.type == KEYDOWN and event.key == K_TAB:
                 match(cfg.control_scheme):
                     case "arrows":   cfg.control_scheme = "wasd"
