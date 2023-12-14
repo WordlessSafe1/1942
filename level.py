@@ -12,15 +12,18 @@ def init():
         0, # Ocean
         1, # Carrier
         0, # Ocean
-        # 0, # Ocean
-        # 0, # Ocean
         2, # Forest 1
         0, # Ocean
         1, # Carrier
-        
+
         0, # Ocean
         # 0, # Ocean
         # 0, # Ocean
+        3, # Forest 2
+        0, # Ocean
+        1, # Carrier
+
+        0, # Ocean
         2, # Forest 1
         0, # Ocean
         1, # Carrier
@@ -277,7 +280,111 @@ def init():
             ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 95)),
             (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0)),
 
-            (660, None, -1),  # Wait until all off screen
+            ( 660, None, -1), # Wait until all off screen
+            (None, None, -1), # Wait until stage end
+        ],
+        [
+            (325, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50)),
+            ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0, 400)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0,  95)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+
+            ( 45, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+            ( 20, Enemy, (screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+            ( 20, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],       0, -25, 160)),
+
+            (150, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+            ( 20, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 25, Enemy, (screenwidth - 3.5*ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+            ( 20, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],       0, -25, 160)),
+
+            (500, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50, 160)),
+            ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0, 400)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+            (  0, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0,  95)),
+            (  0, Enemy, (-ENEMY_SIZE[0],                  -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 110)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0,  95)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+
+            (250, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["cross right"],            0, 175,  20)),
+            ( 10, Enemy, (screenwidth,                   screenheight / 3,  ENEMY_PATHS["cross left"],            0, 170,  10)),
+            ( 10, Enemy, (2.5 * ENEMY_SIZE[0],             -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50,  42)),
+            (  5, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 15, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+            ( 20, Enemy, (screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+            ( 20, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],       0, -25, 160)),
+
+            (500, Enemy, (2.5 * ENEMY_SIZE[0],             -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50, 42)),
+            ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0,  15)),
+            ( 90, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0, 110)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0,  73)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0,  150)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0)),
+            (  0, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+            ( 20, Enemy, (2 * ENEMY_SIZE[0],               -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],            0,  25)),
+            ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0,  15)),
+
+            (325, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50)),
+            ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0, 400)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0,  95)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right double"],      0,  0)),
+
+            (250, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+            ( 20, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 25, Enemy, (screenwidth - 3.5*ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+            ( 20, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],       0, -25, 160)),
+            (  0, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50, 160)),
+            ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 30, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+            ( 20, Enemy, (screenwidth - 4 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+
+            (200, Enemy, (screenwidth - 2 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+            ( 20, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 25, Enemy, (screenwidth - 3.5*ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0)),
+            ( 20, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],       0, -25, 160)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0, 400)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0,  95)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0)),
+            ( 30, Enemy, (-ENEMY_SIZE[0],                screenheight / 4, ENEMY_PATHS["loop right"],             0,  0)),
+
+            (200, Enemy, (2.5 * ENEMY_SIZE[0],             -ENEMY_SIZE[1], ENEMY_PATHS["cross left wide"],        0, -50, 42)),
+            ( 50, Enemy, (ENEMY_SIZE[0],                   -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,  25)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0,  15)),
+            ( 90, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0, 110)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0,  73)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0,  150)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 2, ENEMY_PATHS["loop left"],              0,  0)),
+            (  0, Enemy, (screenwidth - ENEMY_SIZE[0],     -ENEMY_SIZE[1], ENEMY_PATHS["cross left"],             0,  25, 160)),
+            ( 20, Enemy, (2 * ENEMY_SIZE[0],               -ENEMY_SIZE[1], ENEMY_PATHS["cross right wide"],            0,  25)),
+            ( 25, Enemy, (screenwidth - 3 * ENEMY_SIZE[0], -ENEMY_SIZE[1], ENEMY_PATHS["cross right"],            0,   0,  15)),
+
+            (125, Boss,    (screenwidth / 2,                   screenheight, ENEMY_PATHS["boss"],                   0,  0)),
+
+            (125, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 80)),
+            (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0, 17)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0)),
+            (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0, 41)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0)),
+            (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0, 33)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 160)),
+            (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0)),
+            ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 95)),
+            (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0)),
+
+            ( 660, None, -1), # Wait until all off screen
             (None, None, -1), # Wait until stage end
         ],
         [
@@ -381,6 +488,7 @@ def init():
             ( 30, Enemy, (screenwidth,                   screenheight / 4, ENEMY_PATHS["loop left"],              0,  0, 95)),
             (  0, Enemy, (-ENEMY_SIZE[0],                screenheight / 3, ENEMY_PATHS["loop right"],             0,  0)),
 
+            (660, None, -1),  # Wait until all off screen
             (None, None, -1), # Wait until stage end
         ],
 

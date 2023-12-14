@@ -169,6 +169,7 @@ def init():
         ocean,                                                      # Ocean
         MAP_SPRITESHEET.subsurface(pygame.Rect(0,   0, 225,  502)), # Carrier
         MAP_SPRITESHEET.subsurface(pygame.Rect(0, 620, 225, 1428)), # Forest 1
+        MAP_SPRITESHEET.subsurface(pygame.Rect(225, 560, 225, 1488)), # Forest 2
     ]
     for i in range(len(MAP_TILES)):
         tile = MAP_TILES[i]
