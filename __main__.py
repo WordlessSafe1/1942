@@ -189,8 +189,9 @@ def start_game() -> int:
             wave = 0
         if stage_cooldown > 0 and not (game_over or life_lost):
             stage_cooldown -= 1
-            text = cfg.MEDIUM_FONT.render(f"Stage {stage + 1} complete", True, cfg.white)
-            cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
+            if stage_cooldown:
+                text = cfg.MEDIUM_FONT.render(f"Stage {stage + 1} complete", True, cfg.white)
+                cfg.screen.blit(text, ((screenwidth - text.get_width()) / 2, (screenheight - text.get_height()) / 2))
 
         pygame.display.flip()
         #endregion Draw
