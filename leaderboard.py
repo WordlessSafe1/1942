@@ -1,4 +1,5 @@
 import pygame
+import os
 import config as cfg
 from config import SCREEN_SCALE, screenheight, screenwidth
 from pygame.locals import *
@@ -89,8 +90,9 @@ def new_entry():
         y = (char_selected // 10) * char_size[1] + (100 * SCREEN_SCALE) + (char_selected//10) * 5 * SCREEN_SCALE + (char_selected // 10) * (char_size[1] // 2) - 1 * SCREEN_SCALE
         cfg.screen.blit(cfg.CURSOR_IMAGE, (x, y))
 
-        text = cfg.SMALL_FONT.render(f"TOP {scores[0][1]:>8} {scores[0][0]:<8}", True, cfg.white)
-        cfg.screen.blit(text, ((screenwidth - text.get_width()) // 2, (screenheight - text.get_height()) // 2))
+        if len(scores) > 0:
+            text = cfg.SMALL_FONT.render(f"TOP {scores[0][1]:>8} {scores[0][0]:<8}", True, cfg.white)
+            cfg.screen.blit(text, ((screenwidth - text.get_width()) // 2, (screenheight - text.get_height()) // 2))
 
         text = cfg.SMALL_FONT.render(f"{place_txt} {cfg.score:>8} {name:<8}", True, cfg.blue)
         cfg.screen.blit(text, ((screenwidth - text.get_width()) // 2, (screenheight - text.get_height()) // 2 + 2 * text.get_height()))
@@ -114,11 +116,15 @@ def new_entry():
         cfg.clock.tick(60)
 
 def _save_score(name: str, score: int) -> None:
+    if not os.path.exists("data"):
+        os.mkdir("data")
     with open(LEADERBOARD_PATH, "a", encoding='utf-8') as fptr:
         fptr.write(f"{name};{score}\n")
 
 def _load_scores() -> list[tuple[str, int]]:
     scores = []
+    if not os.path.exists(LEADERBOARD_PATH):
+        return scores
     with open(LEADERBOARD_PATH, "r", encoding='utf-8') as fptr:
         for line in fptr.readlines():
             name, score = line.split(";")
